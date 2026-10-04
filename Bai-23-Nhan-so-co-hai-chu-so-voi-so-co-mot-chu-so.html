@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 23: Đội Đại Dương - Cứu hộ san hô</title>
+    <style>
+        :root { --primary: #0077B6; --success: #38B000; --danger: #D90429; --bg: #E0F7FA; --card: #FFFFFF; --text: #03045E; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: var(--primary); color: white; padding: 1.5rem; text-align: center; }
+        .container { max-width: 700px; margin: 2rem auto; padding: 0 1rem; width: 100%; }
+        .game-window { background: var(--card); border-radius: 20px; padding: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .rounds-stepper { display: flex; gap: 10px; margin-bottom: 2rem; }
+        .step-pill { flex: 1; background: #CAF0F8; text-align: center; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; color: #0077B6; }
+        .step-pill.active { background: var(--primary); color: white; }
+        .step-pill.completed { background: var(--success); color: white; }
+        .question-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.5; }
+        .options-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 600px) { .options-list { grid-template-columns: 1fr; } }
+        .btn-option { background: #F8F9FA; border: 2px solid #ADE8F4; padding: 1rem; border-radius: 12px; font-size: 0.95rem; font-weight: 600; color: var(--text); cursor: pointer; text-align: left; }
+        .btn-option:hover { border-color: var(--primary); background: #CAF0F8; }
+        .alert-box { margin-top: 1.5rem; padding: 1rem; border-radius: 12px; display: none; font-weight: 600; }
+        .alert-box.correct { background: #D4EDDA; color: #155724; }
+        .alert-box.wrong { background: #F8D7DA; color: #721C24; }
+        .btn-next { margin-top: 1.5rem; background: var(--success); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; display: none; float: right; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bài 23: ĐỘI ĐẠI DƯƠNG - CỨU HỘ SAN HÔ</h1>
+        <p>Môn: Toán 3 - Kết nối tri thức với cuộc sống</p>
+    </header>
+    <div class="container">
+        <div class="game-window">
+            <div class="rounds-stepper">
+                <div id="pill-0" class="step-pill active">Vòng 1: Khởi động</div>
+                <div id="pill-1" class="step-pill">Vòng 2: Vượt chướng</div>
+                <div id="pill-2" class="step-pill">Vòng 3: Về đích</div>
+            </div>
+            <div class="question-title" id="q-title"></div>
+            <div class="options-list" id="opts-container"></div>
+            <div id="result-alert" class="alert-box"></div>
+            <div style="overflow: hidden;">
+                <button id="btn-continue" class="btn-next" onclick="nextRound()">Tiếp tục ►</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const rounds = [
+            { title: "Vòng 1: Tàu ngầm bơm lượng oxy nhẩm: 30 × 3 = ? (lít)", options: ["A. 60 lít", "B. 90 lít", "C. 33 lít", "D. 900 lít"], ans: 1 },
+            { title: "Vòng 2: Lặn sâu xuống đáy biển với phép tính: 26 × 3 = ?", options: ["A. 78", "B. 68", "C. 88", "D. 76"], ans: 0 },
+            { title: "Vòng 3: Mỗi vòm san hô cần 45 mảnh ghép. Cần bao nhiêu mảnh ghép để phục hồi 3 vòm san hô như thế?", options: ["A. 125 mảnh", "B. 135 mảnh", "C. 130 mảnh", "D. 140 mảnh"], ans: 1 }
+        ];
+        let currentRound = 0;
+        function renderRound() {
+            for (let i = 0; i < 3; i++) {
+                const pill = document.getElementById(`pill-${i}`);
+                pill.className = 'step-pill' + (i < currentRound ? ' completed' : i === currentRound ? ' active' : '');
+            }
+            const data = rounds[currentRound];
+            document.getElementById('q-title').innerText = data.title;
+            const optsBox = document.getElementById('opts-container');
+            optsBox.innerHTML = '';
+            document.getElementById('result-alert').style.display = 'none';
+            document.getElementById('btn-continue').style.display = 'none';
+            data.options.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-option';
+                btn.innerText = optText;
+                btn.onclick = () => processAnswer(index);
+                optsBox.appendChild(btn);
+            });
+        }
+        function processAnswer(choice) {
+            const data = rounds[currentRound];
+            const alertBox = document.getElementById('result-alert');
+            document.querySelectorAll('.btn-option').forEach(b => b.disabled = true);
+            if (choice === data.ans) {
+                alertBox.className = 'alert-box correct';
+                alertBox.innerText = '🎉 Chính xác! Oxy đã được bơm tới rạn san hô.';
+            } else {
+                alertBox.className = 'alert-box wrong';
+                alertBox.innerText = '❌ Chưa chính xác! Đáp án đúng là: ' + data.options[data.ans];
+            }
+            alertBox.style.display = 'block';
+            document.getElementById('btn-continue').style.display = 'block';
+        }
+        function nextRound() {
+            currentRound++;
+            if (currentRound < 3) renderRound();
+            else { alert('🏆 Chúc mừng Đội đại dương đã cứu hộ thành công rạn san hô!'); location.reload(); }
+        }
+        renderRound();
+    </script>
+</body>
+</html>
