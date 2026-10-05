@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>THÁM HIỂM ĐẢO KHO BÁU</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#e8f7ff,#fff7df);color:#213547}
+.app{max-width:1100px;margin:0 auto;padding:20px}
+.header{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.title{font-size:34px;font-weight:800;margin:0}
+.subtitle{opacity:.8;margin-top:6px}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.badge{background:#fff;border-radius:16px;padding:10px 14px;box-shadow:0 4px 18px rgba(0,0,0,.08);font-weight:700}
+.progress{height:14px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:14px 0 18px}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,#34d399,#22c55e);transition:.3s}
+.card{background:#fff;border-radius:24px;padding:24px;box-shadow:0 8px 30px rgba(0,0,0,.10);margin-bottom:18px}
+.round-title{font-size:24px;font-weight:800;margin:0 0 10px}
+.question{font-size:24px;font-weight:700;margin:10px 0 18px;line-height:1.45}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+button{border:none;border-radius:14px;padding:14px 18px;font-size:18px;font-weight:700;cursor:pointer;transition:.18s}
+.option{background:#f3f4f6;color:#111827}
+.option:hover{transform:translateY(-2px);background:#e5e7eb}
+.option.correct{background:#bbf7d0!important;color:#166534}
+.option.wrong{background:#fecaca!important;color:#991b1b}
+.primary{background:#2563eb;color:white}
+.primary:hover{filter:brightness(1.05)}
+.secondary{background:#eef2ff;color:#3730a3}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.feedback{min-height:34px;margin-top:16px;font-size:18px;font-weight:700}
+.hidden{display:none!important}
+.center{text-align:center}
+.big-emoji{font-size:70px}
+.start h2{font-size:36px;margin:8px 0}
+.start p{font-size:18px;line-height:1.6}
+input[type=text],input[type=number],select{width:100%;padding:14px;border:2px solid #d1d5db;border-radius:12px;font-size:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.stepbox{background:#f8fafc;border-radius:14px;padding:16px;margin-top:12px}
+.rule{background:#fff7ed;border-left:6px solid #fb923c;padding:14px;border-radius:12px;margin:14px 0;font-weight:700}
+.end h2{font-size:38px;margin:8px 0}
+.medal{font-size:80px}
+.small{font-size:14px;opacity:.75}
+@media(max-width:700px){.options,.grid2{grid-template-columns:1fr}.title{font-size:28px}.question{font-size:21px}.card{padding:18px}}
+
+body{background:linear-gradient(135deg,#cffafe,#fef3c7);}
+.theme-strip{background:linear-gradient(90deg,#ffffffcc,#ffffff88);border-radius:18px;padding:10px 16px;margin-bottom:16px;font-weight:800}
+</style>
+</head>
+<body>
+<div class="app">
+  <section id="start" class="card start center">
+    <div class="big-emoji">🏝️</div>
+    <h2>THÁM HIỂM ĐẢO KHO BÁU</h2>
+    <p>Bài 37 – Chia số có ba chữ số cho số có một chữ số</p>
+    <div class="rule" style="text-align:left">
+      <b>Mục tiêu:</b>
+      <ul><li>Chia đúng số có ba chữ số cho số có một chữ số.</li><li>Xác định thương và số dư.</li><li>Vận dụng phép chia vào bài toán thực tế.</li></ul>
+    </div>
+    <button class="primary" onclick="startGame()">Bắt đầu chơi</button>
+  </section>
+
+  <section id="game" class="hidden">
+    <div class="header">
+      <div>
+        <h1 class="title">THÁM HIỂM ĐẢO KHO BÁU</h1>
+        <div class="subtitle">Bài 37 – Chia số có ba chữ số cho số có một chữ số</div>
+      </div>
+      <div class="stats">
+        <div class="badge">⭐ Điểm: <span id="score">0</span></div>
+        <div class="badge">❤️ <span id="lives">3</span></div>
+        <div class="badge">⏱️ <span id="timer">30</span>s</div>
+      </div>
+    </div>
+    <div class="theme-strip">🏝️ Hãy hoàn thành từng nhiệm vụ để chinh phục bài học!</div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="card">
+      <div id="round" class="round-title"></div>
+      <div id="qnum" class="small"></div>
+      <div id="question" class="question"></div>
+      <div id="interactive"></div>
+      <div id="feedback" class="feedback"></div>
+      <div class="controls">
+        <button id="hintBtn" class="secondary" onclick="showHint()">💡 Gợi ý</button>
+        <button id="nextBtn" class="primary hidden" onclick="nextQuestion()">Tiếp theo ➜</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="end" class="card end center hidden">
+    <div class="medal">🏅</div>
+    <h2>Chúc mừng!</h2>
+    <p style="font-size:22px">Em đạt <b><span id="finalScore">0</span>/<span id="maxScore">0</span></b> điểm.</p>
+    <p style="font-size:24px;font-weight:800">NHÀ THÁM HIỂM PHÉP CHIA</p>
+    <button class="primary" onclick="location.reload()">Chơi lại</button>
+  </section>
+</div>
+
+<script>
+const questions = [{"round": "Vòng 1 – Vượt biển", "q": "484 : 4 = ?", "type": "mcq", "options": ["A. 121", "B. 120", "C. 112", "D. 122"], "answer": 0, "explain": "484 : 4 = 121.", "hint": "Chia lần lượt từng hàng."}, {"round": "Vòng 1 – Vượt biển", "q": "357 : 3 = ?", "type": "mcq", "options": ["A. 118", "B. 119", "C. 117", "D. 129"], "answer": 1, "explain": "357 : 3 = 119.", "hint": "35 chia 3 được 11 dư 2, hạ 7 được 27."}, {"round": "Vòng 1 – Vượt biển", "q": "425 : 2 được thương và số dư là:", "type": "mcq", "options": ["A. 212 dư 1", "B. 212 dư 0", "C. 210 dư 5", "D. 21 dư 5"], "answer": 0, "explain": "212×2=424, còn dư 1.", "hint": "Số dư phải nhỏ hơn số chia."}, {"round": "Vòng 1 – Vượt biển", "q": "538 : 5 được:", "type": "mcq", "options": ["A. 107 dư 3", "B. 17 dư 3", "C. 107 dư 1", "D. 108 dư 3"], "answer": 0, "explain": "538 : 5 = 107 dư 3. Đừng quên chữ số 0 ở thương.", "hint": "Khi 3 không chia được cho 5, phải viết 0 vào thương."}, {"round": "Vòng 1 – Vượt biển", "q": "639 : 3 = ?", "type": "mcq", "options": ["A. 213", "B. 212", "C. 203", "D. 231"], "answer": 0, "explain": "639 : 3 = 213.", "hint": "6:3=2, 3:3=1, 9:3=3."}, {"round": "Vòng 2 – Mở khóa bản đồ", "q": "Tìm y: y × 3 = 369", "type": "input", "answer": "123", "explain": "y = 369 : 3 = 123.", "hint": "Muốn tìm thừa số chưa biết, lấy tích chia thừa số đã biết."}, {"round": "Vòng 2 – Mở khóa bản đồ", "q": "Trong phép chia cho 5, số dư lớn nhất là bao nhiêu?", "type": "input", "answer": "4", "explain": "Số dư luôn bé hơn số chia.", "hint": "Số dư lớn nhất là số ngay trước 5."}, {"round": "Vòng 2 – Mở khóa bản đồ", "q": "Một số chia cho 4 được thương 115, dư 2. Số đó là?", "type": "input", "answer": "462", "explain": "115×4+2=462.", "hint": "Số bị chia = thương × số chia + số dư."}, {"round": "Vòng 2 – Mở khóa bản đồ", "q": "Trong phép chia 745 : 7, chữ số hàng đơn vị của thương là?", "type": "input", "answer": "6", "explain": "745 : 7 = 106 dư 3.", "hint": "45 : 7 = 6 dư 3."}, {"round": "Vòng 2 – Mở khóa bản đồ", "q": "Phép chia nào có cùng thương với 240 : 2?", "type": "mcq", "options": ["A. 360 : 3", "B. 480 : 2", "C. 240 : 4", "D. 120 : 2"], "answer": 0, "explain": "240:2=120 và 360:3=120.", "hint": "Tính thương của từng phép chia."}, {"round": "Vòng 3 – Mở rương kho báu", "q": "369 quyển sách xếp đều vào 3 ngăn. Mỗi ngăn có bao nhiêu quyển?", "type": "input", "answer": "123", "explain": "369 : 3 = 123.", "hint": "Chia đều nên dùng phép chia."}, {"round": "Vòng 3 – Mở rương kho báu", "q": "458 kg gạo chia đều vào 4 bao. Mỗi bao có bao nhiêu kg? (chỉ nhập thương)", "type": "input", "answer": "114", "explain": "458 : 4 = 114 dư 2.", "hint": "Kết quả là thương 114, dư 2."}, {"round": "Vòng 3 – Mở rương kho báu", "q": "125 quả trứng, mỗi hộp tối đa 6 quả. Cần ít nhất bao nhiêu hộp?", "type": "input", "answer": "21", "explain": "125:6=20 dư 5 nên cần thêm 1 hộp.", "hint": "Có dư thì cần thêm một hộp."}, {"round": "Vòng 3 – Mở rương kho báu", "q": "248 kg cam, bán 1/4 số cam. Đã bán bao nhiêu kg?", "type": "input", "answer": "62", "explain": "248 : 4 = 62 kg.", "hint": "Tìm 1/4 bằng cách chia cho 4."}, {"round": "Vòng 3 – Mở rương kho báu", "q": "315 m đường, đã sửa 1/3. Còn phải sửa bao nhiêu mét?", "type": "input", "answer": "210", "explain": "315:3=105; 315-105=210.", "hint": "Tính phần đã sửa rồi lấy tổng trừ đi."}];
+let idx=0, score=0, lives=3, timeLeft=30, timerId=null, locked=false;
+const maxScore=questions.length*10;
+
+function startGame(){
+ document.getElementById('start').classList.add('hidden');
+ document.getElementById('game').classList.remove('hidden');
+ render();
+}
+
+function startTimer(){
+ clearInterval(timerId); timeLeft=30; document.getElementById('timer').textContent=timeLeft;
+ timerId=setInterval(()=>{
+   timeLeft--; document.getElementById('timer').textContent=timeLeft;
+   if(timeLeft<=0){clearInterval(timerId); handleWrong(null,true);}
+ },1000);
+}
+
+function render(){
+ locked=false;
+ const q=questions[idx];
+ document.getElementById('round').textContent=q.round;
+ document.getElementById('qnum').textContent=`Câu ${idx+1}/${questions.length}`;
+ document.getElementById('question').innerHTML=q.q;
+ document.getElementById('feedback').textContent='';
+ document.getElementById('nextBtn').classList.add('hidden');
+ document.getElementById('bar').style.width=((idx)/questions.length*100)+'%';
+ const box=document.getElementById('interactive');
+ box.innerHTML='';
+ if(q.type==='mcq'){
+   const wrap=document.createElement('div'); wrap.className='options';
+   q.options.forEach((op,i)=>{
+      const b=document.createElement('button'); b.className='option'; b.innerHTML=op;
+      b.onclick=()=>checkMCQ(i,b); wrap.appendChild(b);
+   });
+   box.appendChild(wrap);
+ } else if(q.type==='input'){
+   const inp=document.createElement('input'); inp.type='text'; inp.id='answerInput'; inp.placeholder='Nhập đáp án...';
+   box.appendChild(inp);
+   const btn=document.createElement('button'); btn.className='primary'; btn.style.marginTop='12px'; btn.textContent='Kiểm tra';
+   btn.onclick=()=>checkInput(); box.appendChild(btn);
+ } else if(q.type==='select'){
+   const sel=document.createElement('select'); sel.id='answerSelect';
+   q.options.forEach(op=>{const o=document.createElement('option');o.value=op;o.textContent=op;sel.appendChild(o);});
+   box.appendChild(sel);
+   const btn=document.createElement('button'); btn.className='primary'; btn.style.marginTop='12px'; btn.textContent='Kiểm tra';
+   btn.onclick=()=>checkSelect(); box.appendChild(btn);
+ }
+ startTimer();
+}
+
+function normalize(v){return String(v).trim().toLowerCase().replace(/\s+/g,' ');}
+function checkMCQ(i,b){
+ if(locked) return;
+ const q=questions[idx];
+ if(i===q.answer){
+   b.classList.add('correct'); handleCorrect();
+ }else{
+   b.classList.add('wrong'); handleWrong(b,false);
+ }
+}
+function checkInput(){
+ if(locked) return;
+ const q=questions[idx], v=document.getElementById('answerInput').value;
+ if(normalize(v)===normalize(q.answer)) handleCorrect(); else handleWrong(null,false);
+}
+function checkSelect(){
+ if(locked) return;
+ const q=questions[idx], v=document.getElementById('answerSelect').value;
+ if(normalize(v)===normalize(q.answer)) handleCorrect(); else handleWrong(null,false);
+}
+function handleCorrect(){
+ if(locked)return; locked=true; clearInterval(timerId);
+ score+=10; document.getElementById('score').textContent=score;
+ const q=questions[idx];
+ document.getElementById('feedback').innerHTML='✅ Chính xác! '+(q.explain||'');
+ document.getElementById('nextBtn').classList.remove('hidden');
+ document.getElementById('bar').style.width=((idx+1)/questions.length*100)+'%';
+}
+function handleWrong(btn,timeout){
+ if(locked)return;
+ lives=Math.max(0,lives-1); document.getElementById('lives').textContent=lives;
+ const q=questions[idx];
+ document.getElementById('feedback').innerHTML=(timeout?'⏰ Hết giờ! ':'❌ Chưa đúng. ')+(q.hint||'Hãy thử lại nhé!');
+ if(lives<=0){
+   locked=true; clearInterval(timerId);
+   document.getElementById('feedback').innerHTML+=' <b>Đã hết lượt tim, chuyển câu tiếp theo.</b>';
+   document.getElementById('nextBtn').classList.remove('hidden');
+ } else if(timeout) {
+   startTimer();
+ }
+}
+function showHint(){
+ const q=questions[idx];
+ document.getElementById('feedback').innerHTML='💡 '+(q.hint||'Đọc kỹ đề và xác định phép tính cần thực hiện.');
+}
+function nextQuestion(){
+ idx++;
+ if(idx>=questions.length) return finish();
+ render();
+}
+function finish(){
+ clearInterval(timerId);
+ document.getElementById('game').classList.add('hidden');
+ document.getElementById('end').classList.remove('hidden');
+ document.getElementById('finalScore').textContent=score;
+ document.getElementById('maxScore').textContent=maxScore;
+}
+</script>
+</body>
+</html>
