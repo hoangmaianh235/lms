@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 28: Thành phố tương lai</title>
+    <style>
+        :root { --primary: #3A86FF; --success: #38B000; --danger: #FF006E; --bg: #EDF2F4; --card: #FFFFFF; --text: #2B2D42; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: #8338EC; color: white; padding: 1.5rem; text-align: center; }
+        .container { max-width: 700px; margin: 2rem auto; padding: 0 1rem; width: 100%; }
+        .game-window { background: var(--card); border-radius: 20px; padding: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .rounds-stepper { display: flex; gap: 10px; margin-bottom: 2rem; }
+        .step-pill { flex: 1; background: #8D99AE; text-align: center; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; color: white; }
+        .step-pill.active { background: #8338EC; color: white; }
+        .step-pill.completed { background: var(--success); color: white; }
+        .question-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.5; }
+        .options-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 600px) { .options-list { grid-template-columns: 1fr; } }
+        .btn-option { background: #F8F9FA; border: 2px solid #8D99AE; padding: 1rem; border-radius: 12px; font-size: 0.95rem; font-weight: 600; color: var(--text); cursor: pointer; text-align: left; }
+        .btn-option:hover { border-color: #8338EC; background: #E0AFA0; }
+        .alert-box { margin-top: 1.5rem; padding: 1rem; border-radius: 12px; display: none; font-weight: 600; }
+        .alert-box.correct { background: #D4EDDA; color: #155724; }
+        .alert-box.wrong { background: #F8D7DA; color: #721C24; }
+        .btn-next { margin-top: 1.5rem; background: #8338EC; color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; display: none; float: right; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bài 28: XÂY DỰNG THÀNH PHỐ TƯƠNG LAI</h1>
+        <p>Môn: Toán 3 - Kết nối tri thức với cuộc sống</p>
+    </header>
+    <div class="container">
+        <div class="game-window">
+            <div class="rounds-stepper">
+                <div id="pill-0" class="step-pill active">Vòng 1: Khởi động</div>
+                <div id="pill-1" class="step-pill">Vòng 2: Vượt chướng</div>
+                <div id="pill-2" class="step-pill">Vòng 3: Về đích</div>
+            </div>
+            <div class="question-title" id="q-title"></div>
+            <div class="options-list" id="opts-container"></div>
+            <div id="result-alert" class="alert-box"></div>
+            <div style="overflow: hidden;">
+                <button id="btn-continue" class="btn-next" onclick="nextRound()">Tiếp tục ►</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const rounds = [
+            { title: "Vòng 1: Đội A trồng 18 cây. Đội B ít hơn Đội A 4 cây. Để tính tổng cây cả hai đội, bước 1 tính gì?", options: ["A. Số cây Đội B (18 - 4)", "B. Tổng số cây (18 + 4)", "C. Lấy 18 ÷ 4", "D. Lấy 18 × 4"], ans: 0 },
+            { title: "Vòng 2: Tòa nhà A cao 25m. Tòa B cao hơn tòa A 10m. Hỏi CẢ HAI tòa nhà cao bao nhiêu mét?", options: ["A. 35 m", "B. 60 m", "C. 50 m", "D. 45 m"], ans: 1 },
+            { title: "Vòng 3: Công viên có 36 ghế đá. Số thùng rác ít hơn số ghế 4 lần. Tổng số ghế đá và thùng rác là:", options: ["A. 9 cái", "B. 45 cái", "C. 40 cái", "D. 32 cái"], ans: 1 }
+        ];
+        let currentRound = 0;
+        function renderRound() {
+            for (let i = 0; i < 3; i++) {
+                const pill = document.getElementById(`pill-${i}`);
+                pill.className = 'step-pill' + (i < currentRound ? ' completed' : i === currentRound ? ' active' : '');
+            }
+            const data = rounds[currentRound];
+            document.getElementById('q-title').innerText = data.title;
+            const optsBox = document.getElementById('opts-container');
+            optsBox.innerHTML = '';
+            document.getElementById('result-alert').style.display = 'none';
+            document.getElementById('btn-continue').style.display = 'none';
+            data.options.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-option';
+                btn.innerText = optText;
+                btn.onclick = () => processAnswer(index);
+                optsBox.appendChild(btn);
+            });
+        }
+        function processAnswer(choice) {
+            const data = rounds[currentRound];
+            const alertBox = document.getElementById('result-alert');
+            document.querySelectorAll('.btn-option').forEach(b => b.disabled = true);
+            if (choice === data.ans) {
+                alertBox.className = 'alert-box correct';
+                alertBox.innerText = '🎉 Chính xác! Công trình đã được hoàn thành.';
+            } else {
+                alertBox.className = 'alert-box wrong';
+                alertBox.innerText = '❌ Chưa chính xác! Đáp án đúng là: ' + data.options[data.ans];
+            }
+            alertBox.style.display = 'block';
+            document.getElementById('btn-continue').style.display = 'block';
+        }
+        function nextRound() {
+            currentRound++;
+            if (currentRound < 3) renderRound();
+            else { alert('🏆 Chúc mừng Kiến trúc sư trưởng đã hoàn thành thành phố tương lai!'); location.reload(); }
+        }
+        renderRound();
+    </script>
+</body>
+</html>

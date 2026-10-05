@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 25: Nhà máy bánh kẹo phép thuật</title>
+    <style>
+        :root { --primary: #FFB703; --success: #2EC4B6; --danger: #E63946; --bg: #FFF3BF; --card: #FFFFFF; --text: #D4A373; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
+        body { background-color: var(--bg); color: #333; min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: #FB8500; color: white; padding: 1.5rem; text-align: center; }
+        .container { max-width: 700px; margin: 2rem auto; padding: 0 1rem; width: 100%; }
+        .game-window { background: var(--card); border-radius: 20px; padding: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .rounds-stepper { display: flex; gap: 10px; margin-bottom: 2rem; }
+        .step-pill { flex: 1; background: #FFE6A7; text-align: center; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; color: #BB9457; }
+        .step-pill.active { background: #FB8500; color: white; }
+        .step-pill.completed { background: var(--success); color: white; }
+        .question-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.5; color: #432818; }
+        .options-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 600px) { .options-list { grid-template-columns: 1fr; } }
+        .btn-option { background: #FFF9EC; border: 2px solid #FFE6A7; padding: 1rem; border-radius: 12px; font-size: 0.95rem; font-weight: 600; color: #432818; cursor: pointer; text-align: left; }
+        .btn-option:hover { border-color: #FB8500; background: #FFE6A7; }
+        .alert-box { margin-top: 1.5rem; padding: 1rem; border-radius: 12px; display: none; font-weight: 600; }
+        .alert-box.correct { background: #D4EDDA; color: #155724; }
+        .alert-box.wrong { background: #F8D7DA; color: #721C24; }
+        .btn-next { margin-top: 1.5rem; background: var(--success); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; display: none; float: right; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bài 25: NHÀ MÁY BÁNH KẸO PHÉP THUẬT</h1>
+        <p>Môn: Toán 3 - Kết nối tri thức với cuộc sống</p>
+    </header>
+    <div class="container">
+        <div class="game-window">
+            <div class="rounds-stepper">
+                <div id="pill-0" class="step-pill active">Vòng 1: Khởi động</div>
+                <div id="pill-1" class="step-pill">Vòng 2: Vượt chướng</div>
+                <div id="pill-2" class="step-pill">Vòng 3: Về đích</div>
+            </div>
+            <div class="question-title" id="q-title"></div>
+            <div class="options-list" id="opts-container"></div>
+            <div id="result-alert" class="alert-box"></div>
+            <div style="overflow: hidden;">
+                <button id="btn-continue" class="btn-next" onclick="nextRound()">Tiếp tục ►</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const rounds = [
+            { title: "Vòng 1: Phép chia nào dưới đây thuộc loại PHÉP CHIA CÓ DƯ?", options: ["A. 24 ÷ 4", "B. 35 ÷ 5", "C. 27 ÷ 5", "D. 18 ÷ 2"], ans: 2 },
+            { title: "Vòng 2: Thực hiện phép chia: 38 ÷ 5 thu được thương và số dư là bao nhiêu?", options: ["A. Thương 7, dư 3", "B. Thương 7, dư 2", "C. Thương 6, dư 8", "D. Thương 8, dư 2"], ans: 0 },
+            { title: "Vòng 3: Có 43 cái kẹo đóng vào túi, mỗi túi 5 cái. Cần ÍT NHẤT bao nhiêu túi để chứa hết kẹo?", options: ["A. 8 túi", "B. 9 túi", "C. 10 túi", "D. 7 túi"], ans: 1 }
+        ];
+        let currentRound = 0;
+        function renderRound() {
+            for (let i = 0; i < 3; i++) {
+                const pill = document.getElementById(`pill-${i}`);
+                pill.className = 'step-pill' + (i < currentRound ? ' completed' : i === currentRound ? ' active' : '');
+            }
+            const data = rounds[currentRound];
+            document.getElementById('q-title').innerText = data.title;
+            const optsBox = document.getElementById('opts-container');
+            optsBox.innerHTML = '';
+            document.getElementById('result-alert').style.display = 'none';
+            document.getElementById('btn-continue').style.display = 'none';
+            data.options.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-option';
+                btn.innerText = optText;
+                btn.onclick = () => processAnswer(index);
+                optsBox.appendChild(btn);
+            });
+        }
+        function processAnswer(choice) {
+            const data = rounds[currentRound];
+            const alertBox = document.getElementById('result-alert');
+            document.querySelectorAll('.btn-option').forEach(b => b.disabled = true);
+            if (choice === data.ans) {
+                alertBox.className = 'alert-box correct';
+                alertBox.innerText = '🎉 Chính xác! Bánh kẹo đã được đóng gói vừa vặn.';
+            } else {
+                alertBox.className = 'alert-box wrong';
+                alertBox.innerText = '❌ Chưa chính xác! Đáp án đúng là: ' + data.options[data.ans];
+            }
+            alertBox.style.display = 'block';
+            document.getElementById('btn-continue').style.display = 'block';
+        }
+        function nextRound() {
+            currentRound++;
+            if (currentRound < 3) renderRound();
+            else { alert('🏆 Chúc mừng bạn đã hoàn thành xuất sắc ca làm việc tại xưởng bánh kẹo!'); location.reload(); }
+        }
+        renderRound();
+    </script>
+</body>
+</html>
