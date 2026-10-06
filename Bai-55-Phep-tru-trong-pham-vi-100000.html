@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GIẢI CỨU KHO BÁU BỊ ĐÁNH CẮP</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#1f2937;background:#f7fafc}
+.app{max-width:1100px;margin:0 auto;padding:20px}
+.hero{background:rgba(255,255,255,.92);border-radius:26px;padding:28px;box-shadow:0 12px 35px rgba(0,0,0,.1);text-align:center}
+.hero h1{margin:8px 0;font-size:38px}
+.hero p{font-size:18px;line-height:1.6}
+.big{font-size:76px}
+button{border:0;border-radius:14px;padding:13px 18px;font-size:17px;font-weight:700;cursor:pointer}
+.primary{background:#2563eb;color:white}
+.secondary{background:#eef2ff;color:#3730a3}
+.hidden{display:none!important}
+.top{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;margin:16px 0}
+.title{font-size:30px;font-weight:800}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.pill{background:white;border-radius:14px;padding:10px 14px;box-shadow:0 4px 16px rgba(0,0,0,.08);font-weight:700}
+.progress{height:14px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:12px 0 18px}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#06b6d4);transition:.3s}
+.card{background:white;border-radius:24px;padding:24px;box-shadow:0 10px 28px rgba(0,0,0,.09)}
+.round{font-size:23px;font-weight:800;margin-bottom:8px}
+.qno{font-size:14px;opacity:.7}
+.question{font-size:24px;font-weight:700;line-height:1.5;margin:14px 0 18px}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.option{background:#f3f4f6;color:#111827}
+.option:hover{transform:translateY(-1px)}
+.option.correct{background:#bbf7d0;color:#166534}
+.option.wrong{background:#fecaca;color:#991b1b}
+.feedback{min-height:34px;margin-top:14px;font-size:18px;font-weight:700}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+input,select{width:100%;padding:14px;border:2px solid #d1d5db;border-radius:12px;font-size:20px}
+.rule{background:#fff7ed;border-left:6px solid #fb923c;border-radius:12px;padding:14px;margin:14px 0;text-align:left}
+.end{text-align:center}
+.end .medal{font-size:82px}
+.small{font-size:14px;opacity:.72}
+@media(max-width:700px){.options{grid-template-columns:1fr}.hero h1{font-size:30px}.question{font-size:21px}.card{padding:18px}}
+
+body{background:linear-gradient(135deg,#ede9fe,#fee2e2);}
+.theme{background:rgba(255,255,255,.82);border-radius:18px;padding:12px 16px;font-weight:800;margin-bottom:14px}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="start" class="hero">
+  <div class="big">🔐</div>
+  <h1>GIẢI CỨU KHO BÁU BỊ ĐÁNH CẮP</h1>
+  <p>Bài 55 – Phép trừ trong phạm vi 10 000</p>
+  <div class="rule">
+    <b>Mục tiêu học tập:</b>
+    <ul><li>Trừ đúng trong phạm vi 10 000.</li><li>Tìm số bị trừ, số trừ và kiểm tra bằng phép cộng.</li><li>Giải bài toán tìm phần còn lại và phần chênh lệch.</li></ul>
+  </div>
+  <button class="primary" onclick="startGame()">Bắt đầu</button>
+  <button class="secondary" onclick="alert('Trò chơi gồm 3 vòng. Trả lời đúng để ghi điểm, hoàn thành từng nhiệm vụ và nhận huy hiệu cuối game!')">Cách chơi</button>
+</section>
+
+<section id="game" class="hidden">
+  <div class="top">
+    <div>
+      <div class="title">GIẢI CỨU KHO BÁU BỊ ĐÁNH CẮP</div>
+      <div class="small">Bài 55 – Phép trừ trong phạm vi 10 000</div>
+    </div>
+    <div class="stats">
+      <div class="pill">⭐ <span id="score">0</span></div>
+      <div class="pill">❤️ <span id="lives">3</span></div>
+      <div class="pill">⏱️ <span id="timer">30</span>s</div>
+    </div>
+  </div>
+  <div class="theme">🔐 Hoàn thành nhiệm vụ để tiến tới đích!</div>
+  <div class="progress"><div id="bar"></div></div>
+  <div class="card">
+    <div id="round" class="round"></div>
+    <div id="qno" class="qno"></div>
+    <div id="question" class="question"></div>
+    <div id="interactive"></div>
+    <div id="feedback" class="feedback"></div>
+    <div class="controls">
+      <button class="secondary" onclick="showHint()">💡 Gợi ý</button>
+      <button id="nextBtn" class="primary hidden" onclick="nextQuestion()">Tiếp theo ➜</button>
+    </div>
+  </div>
+</section>
+
+<section id="end" class="card end hidden">
+  <div class="medal">🏅</div>
+  <h2>Chúc mừng!</h2>
+  <p style="font-size:22px">Em đạt <b><span id="finalScore">0</span>/<span id="maxScore">0</span></b> điểm.</p>
+  <p style="font-size:24px;font-weight:800">THÁM TỬ PHÉP TRỪ</p>
+  <button class="primary" onclick="location.reload()">Chơi lại</button>
+</section>
+</div>
+
+<script>
+const questions = [{"round": "Vòng 1 – Mở khóa két sắt", "q": "7 654 - 3 212 = ?", "type": "mcq", "options": ["A. 4 442", "B. 4 342", "C. 4 452", "D. 4 542"], "answer": 0, "explain": "7 654 - 3 212 = 4 442.", "hint": "Trừ theo từng hàng."}, {"round": "Vòng 1 – Mở khóa két sắt", "q": "5 843 - 2 617 = ?", "type": "mcq", "options": ["A. 3 216", "B. 3 226", "C. 3 236", "D. 3 326"], "answer": 1, "explain": "5 843 - 2 617 = 3 226.", "hint": "Chú ý mượn ở hàng đơn vị."}, {"round": "Vòng 1 – Mở khóa két sắt", "q": "6 352 - 2 715 = ?", "type": "mcq", "options": ["A. 3 637", "B. 3 647", "C. 4 637", "D. 3 537"], "answer": 0, "explain": "Kết quả là 3 637.", "hint": "Thực hiện từ hàng đơn vị sang trái."}, {"round": "Vòng 1 – Mở khóa két sắt", "q": "8 642 - 3 527 = ?", "type": "mcq", "options": ["A. 5 105", "B. 5 115", "C. 5 125", "D. 5 215"], "answer": 1, "explain": "8 642 - 3 527 = 5 115.", "hint": "Kiểm tra hàng chục sau khi mượn."}, {"round": "Vòng 1 – Mở khóa két sắt", "q": "9 504 - 4 123 = ?", "type": "mcq", "options": ["A. 5 381", "B. 5 481", "C. 5 371", "D. 5 281"], "answer": 0, "explain": "9 504 - 4 123 = 5 381.", "hint": "Trừ đúng theo hàng."}, {"round": "Vòng 2 – Truy tìm mật mã", "q": "Tìm x: x - 2 135 = 3 240", "type": "input", "answer": "5375", "explain": "x = 3 240 + 2 135 = 5 375.", "hint": "Muốn tìm số bị trừ, lấy hiệu cộng số trừ."}, {"round": "Vòng 2 – Truy tìm mật mã", "q": "Tìm x: 5 468 - x = 2 315", "type": "input", "answer": "3153", "explain": "x = 5 468 - 2 315 = 3 153.", "hint": "Muốn tìm số trừ, lấy số bị trừ trừ hiệu."}, {"round": "Vòng 2 – Truy tìm mật mã", "q": "Biết 6 420 - 2 315 = 4 105. Phép tính kiểm tra đúng là:", "type": "mcq", "options": ["A. 4 105 + 2 315 = 6 420", "B. 4 105 - 2 315 = 6 420", "C. 6 420 + 2 315 = 4 105", "D. 6 420 + 4 105 = 2 315"], "answer": 0, "explain": "Hiệu + số trừ = số bị trừ.", "hint": "Dùng phép cộng để kiểm tra phép trừ."}, {"round": "Vòng 2 – Truy tìm mật mã", "q": "6 500 - 2 200 … 5 900 - 1 500", "type": "select", "options": [">", "<", "="], "answer": "<", "explain": "4 300 < 4 400.", "hint": "Tính hai hiệu trước."}, {"round": "Vòng 2 – Truy tìm mật mã", "q": "7 000 - 2 300 - 1 200 = ?", "type": "mcq", "options": ["A. 3 500", "B. 4 500", "C. 3 400", "D. 5 900"], "answer": 0, "explain": "7 000 - 2 300 = 4 700; 4 700 - 1 200 = 3 500.", "hint": "Tính từ trái sang phải."}, {"round": "Vòng 3 – Thu hồi kho báu", "q": "Kho có 6 450 kg gạo, đã xuất 2 130 kg. Còn lại bao nhiêu kg?", "type": "input", "answer": "4320", "explain": "6 450 - 2 130 = 4 320.", "hint": "Tìm phần còn lại."}, {"round": "Vòng 3 – Thu hồi kho báu", "q": "Trường A có 3 850 học sinh, trường B có 3 215 học sinh. Trường A nhiều hơn bao nhiêu học sinh?", "type": "input", "answer": "635", "explain": "3 850 - 3 215 = 635.", "hint": "Tìm phần chênh lệch."}, {"round": "Vòng 3 – Thu hồi kho báu", "q": "Cửa hàng có 7 250 quyển vở, đã bán 3 125 quyển. Còn lại bao nhiêu quyển?", "type": "input", "answer": "4125", "explain": "7 250 - 3 125 = 4 125.", "hint": "Lấy số ban đầu trừ số đã bán."}, {"round": "Vòng 3 – Thu hồi kho báu", "q": "Ô tô phải đi 8 000 m, đã đi 3 250 m. Còn phải đi bao nhiêu mét?", "type": "input", "answer": "4750", "explain": "8 000 - 3 250 = 4 750 m.", "hint": "Tìm quãng đường còn lại."}, {"round": "Vòng 3 – Thu hồi kho báu", "q": "Kho có 7 500 kg hàng. Sáng chuyển 2 100 kg, chiều chuyển 1 300 kg. Còn lại bao nhiêu kg?", "type": "input", "answer": "4100", "explain": "7 500-2 100-1 300=4 100.", "hint": "Bài toán có 2 bước."}];
+let idx=0, score=0, lives=3, timeLeft=30, timerId=null, locked=false;
+const maxScore=questions.length*10;
+
+function startGame(){
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  render();
+}
+function startTimer(){
+  clearInterval(timerId);
+  timeLeft=30;
+  document.getElementById('timer').textContent=timeLeft;
+  timerId=setInterval(()=>{
+    timeLeft--;
+    document.getElementById('timer').textContent=timeLeft;
+    if(timeLeft<=0){
+      clearInterval(timerId);
+      handleWrong(true);
+    }
+  },1000);
+}
+function render(){
+  locked=false;
+  const q=questions[idx];
+  document.getElementById('round').textContent=q.round;
+  document.getElementById('qno').textContent=`Câu ${idx+1}/${questions.length}`;
+  document.getElementById('question').innerHTML=q.q;
+  document.getElementById('feedback').innerHTML='';
+  document.getElementById('nextBtn').classList.add('hidden');
+  document.getElementById('bar').style.width=((idx)/questions.length*100)+'%';
+  const box=document.getElementById('interactive');
+  box.innerHTML='';
+  if(q.type==='mcq'){
+    const wrap=document.createElement('div');wrap.className='options';
+    q.options.forEach((op,i)=>{
+      const b=document.createElement('button');b.className='option';b.innerHTML=op;
+      b.onclick=()=>checkMCQ(i,b);wrap.appendChild(b);
+    });
+    box.appendChild(wrap);
+  } else if(q.type==='input'){
+    const inp=document.createElement('input'); inp.id='answerInput'; inp.placeholder='Nhập đáp án...';
+    box.appendChild(inp);
+    const b=document.createElement('button'); b.className='primary'; b.style.marginTop='12px'; b.textContent='Kiểm tra';
+    b.onclick=checkInput; box.appendChild(b);
+  } else if(q.type==='select'){
+    const s=document.createElement('select'); s.id='answerSelect';
+    q.options.forEach(op=>{let o=document.createElement('option');o.value=op;o.textContent=op;s.appendChild(o);});
+    box.appendChild(s);
+    const b=document.createElement('button'); b.className='primary'; b.style.marginTop='12px'; b.textContent='Kiểm tra';
+    b.onclick=checkSelect; box.appendChild(b);
+  }
+  startTimer();
+}
+function norm(v){return String(v).trim().toLowerCase().replace(/\s+/g,' ');}
+function checkMCQ(i,b){
+  if(locked)return;
+  const q=questions[idx];
+  if(i===q.answer){b.classList.add('correct');handleCorrect();}
+  else{b.classList.add('wrong');handleWrong(false);}
+}
+function checkInput(){
+  if(locked)return;
+  const q=questions[idx],v=document.getElementById('answerInput').value;
+  if(norm(v)===norm(q.answer))handleCorrect();else handleWrong(false);
+}
+function checkSelect(){
+  if(locked)return;
+  const q=questions[idx],v=document.getElementById('answerSelect').value;
+  if(norm(v)===norm(q.answer))handleCorrect();else handleWrong(false);
+}
+function handleCorrect(){
+  locked=true;clearInterval(timerId);score+=10;
+  document.getElementById('score').textContent=score;
+  const q=questions[idx];
+  document.getElementById('feedback').innerHTML='✅ Chính xác! '+(q.explain||'');
+  document.getElementById('nextBtn').classList.remove('hidden');
+  document.getElementById('bar').style.width=((idx+1)/questions.length*100)+'%';
+}
+function handleWrong(timeout){
+  if(locked)return;
+  lives=Math.max(0,lives-1);
+  document.getElementById('lives').textContent=lives;
+  const q=questions[idx];
+  document.getElementById('feedback').innerHTML=(timeout?'⏰ Hết giờ! ':'❌ Chưa đúng. ')+(q.hint||'Hãy thử lại nhé!');
+  if(lives<=0){
+    locked=true;clearInterval(timerId);
+    document.getElementById('feedback').innerHTML+=' <b>Đã hết lượt tim, chuyển sang câu tiếp theo.</b>';
+    document.getElementById('nextBtn').classList.remove('hidden');
+  } else if(timeout) startTimer();
+}
+function showHint(){
+  const q=questions[idx];
+  document.getElementById('feedback').innerHTML='💡 '+(q.hint||'Đọc kỹ đề và xác định phép tính phù hợp.');
+}
+function nextQuestion(){
+  idx++;
+  if(idx>=questions.length){finish();return;}
+  render();
+}
+function finish(){
+  clearInterval(timerId);
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('end').classList.remove('hidden');
+  document.getElementById('finalScore').textContent=score;
+  document.getElementById('maxScore').textContent=maxScore;
+}
+</script>
+</body>
+</html>
