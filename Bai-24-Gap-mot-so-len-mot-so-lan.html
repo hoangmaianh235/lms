@@ -1,97 +1,85 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bài 24: Xưởng chế tạo Robot</title>
-    <style>
-        :root { --primary: #7209B7; --success: #4CC9F0; --danger: #F72585; --bg: #2B2D42; --card: #3D405B; --text: #FFFFFF; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
-        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-        header { background: var(--primary); color: white; padding: 1.5rem; text-align: center; }
-        .container { max-width: 700px; margin: 2rem auto; padding: 0 1rem; width: 100%; }
-        .game-window { background: var(--card); border-radius: 20px; padding: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .rounds-stepper { display: flex; gap: 10px; margin-bottom: 2rem; }
-        .step-pill { flex: 1; background: #8D99AE; text-align: center; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; color: #2B2D42; }
-        .step-pill.active { background: var(--primary); color: white; }
-        .step-pill.completed { background: var(--success); color: #2B2D42; }
-        .question-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.5; }
-        .options-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        @media (max-width: 600px) { .options-list { grid-template-columns: 1fr; } }
-        .btn-option { background: #2B2D42; border: 2px solid transparent; padding: 1rem; border-radius: 12px; font-size: 0.95rem; font-weight: 600; color: white; cursor: pointer; text-align: left; }
-        .btn-option:hover { border-color: var(--success); background: #4A4E69; }
-        .alert-box { margin-top: 1.5rem; padding: 1rem; border-radius: 12px; display: none; font-weight: 600; }
-        .alert-box.correct { background: #4CC9F0; color: #2B2D42; }
-        .alert-box.wrong { background: #F72585; color: white; }
-        .btn-next { margin-top: 1.5rem; background: var(--success); color: #2B2D42; border: none; padding: 12px 24px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; display: none; float: right; }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Bài 24: XƯỞNG CHẾ TẠO ROBOT</h1>
-        <p>Môn: Toán 3 - Kết nối tri thức với cuộc sống</p>
-    </header>
-    <div class="container">
-        <div class="game-window">
-            <div class="rounds-stepper">
-                <div id="pill-0" class="step-pill active">Vòng 1: Khởi động</div>
-                <div id="pill-1" class="step-pill">Vòng 2: Vượt chướng</div>
-                <div id="pill-2" class="step-pill">Vòng 3: Về đích</div>
-            </div>
-            <div class="question-title" id="q-title"></div>
-            <div class="options-list" id="opts-container"></div>
-            <div id="result-alert" class="alert-box"></div>
-            <div style="overflow: hidden;">
-                <button id="btn-continue" class="btn-next" onclick="nextRound()">Tiếp tục ►</button>
-            </div>
-        </div>
-    </div>
-    <script>
-        const rounds = [
-            { title: "Vòng 1: Pin có 7 đơn vị năng lượng, khi qua máy 'gấp 4 lần' ta chọn phép tính nào?", options: ["A. 7 + 4 = 11", "B. 7 - 4 = 3", "C. 7 × 4 = 28", "D. 7 ÷ 4"], ans: 2 },
-            { title: "Vòng 2: Có 9 bánh răng, sau khi gấp lên 3 lần sẽ thu được bao nhiêu bánh răng?", options: ["A. 12 bánh răng", "B. 27 bánh răng", "C. 18 bánh răng", "D. 24 bánh răng"], ans: 1 },
-            { title: "Vòng 3: Robot A làm được 9 linh kiện, Robot B làm gấp 4 lần Robot A. Hỏi CẢ HAI Robot làm bao nhiêu linh kiện?", options: ["A. 36 linh kiện", "B. 45 linh kiện", "C. 13 linh kiện", "D. 40 linh kiện"], ans: 1 }
-        ];
-        let currentRound = 0;
-        function renderRound() {
-            for (let i = 0; i < 3; i++) {
-                const pill = document.getElementById(`pill-${i}`);
-                pill.className = 'step-pill' + (i < currentRound ? ' completed' : i === currentRound ? ' active' : '');
-            }
-            const data = rounds[currentRound];
-            document.getElementById('q-title').innerText = data.title;
-            const optsBox = document.getElementById('opts-container');
-            optsBox.innerHTML = '';
-            document.getElementById('result-alert').style.display = 'none';
-            document.getElementById('btn-continue').style.display = 'none';
-            data.options.forEach((optText, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'btn-option';
-                btn.innerText = optText;
-                btn.onclick = () => processAnswer(index);
-                optsBox.appendChild(btn);
-            });
-        }
-        function processAnswer(choice) {
-            const data = rounds[currentRound];
-            const alertBox = document.getElementById('result-alert');
-            document.querySelectorAll('.btn-option').forEach(b => b.disabled = true);
-            if (choice === data.ans) {
-                alertBox.className = 'alert-box correct';
-                alertBox.innerText = '🎉 Chính xác! Công suất đã được nhân gấp lên.';
-            } else {
-                alertBox.className = 'alert-box wrong';
-                alertBox.innerText = '❌ Chưa chính xác! Đáp án đúng là: ' + data.options[data.ans];
-            }
-            alertBox.style.display = 'block';
-            document.getElementById('btn-continue').style.display = 'block';
-        }
-        function nextRound() {
-            currentRound++;
-            if (currentRound < 3) renderRound();
-            else { alert('🏆 Chúc mừng bạn đã hoàn thành lắp ráp Robot siêu cấp!'); location.reload(); }
-        }
-        renderRound();
-    </script>
-</body>
-</html>
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VƯƠNG QUỐC PHÓNG TO</title><style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#1f2937}
+.app{max-width:1100px;margin:0 auto;padding:20px}
+.hero,.card{background:rgba(255,255,255,.94);border-radius:26px;padding:24px;box-shadow:0 12px 34px rgba(0,0,0,.12)}
+.hero{text-align:center}
+.big{font-size:78px}
+h1{margin:8px 0 6px;font-size:36px}
+.sub{font-size:18px;line-height:1.55}
+.rule{background:#fff7ed;border-left:6px solid #fb923c;border-radius:14px;padding:14px;text-align:left;margin:16px 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0}
+.title{font-size:29px;font-weight:800}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.pill{background:#fff;padding:10px 14px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.08);font-weight:700}
+.progress{height:14px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:12px 0 18px}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#06b6d4);transition:.3s}
+.mission{background:rgba(255,255,255,.8);border-radius:18px;padding:12px 16px;margin-bottom:14px;font-weight:800}
+.round{font-size:23px;font-weight:800}
+.qno{font-size:14px;opacity:.72}
+.question{font-size:23px;line-height:1.5;font-weight:700;margin:14px 0 18px}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+button{border:0;border-radius:14px;padding:13px 18px;font-size:17px;font-weight:700;cursor:pointer;transition:.15s}
+button:hover{transform:translateY(-1px)}
+.primary{background:#2563eb;color:white}
+.secondary{background:#eef2ff;color:#3730a3}
+.option{background:#f3f4f6;color:#111827}
+.option.correct{background:#bbf7d0;color:#166534}
+.option.wrong{background:#fecaca;color:#991b1b}
+input,select{width:100%;padding:14px;border:2px solid #d1d5db;border-radius:12px;font-size:20px}
+.feedback{min-height:36px;margin-top:14px;font-size:18px;font-weight:700}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.hidden{display:none!important}
+.end{text-align:center}.medal{font-size:84px}
+@media(max-width:700px){.options{grid-template-columns:1fr}.question{font-size:20px}h1{font-size:29px}.card,.hero{padding:18px}}
+ body{background:linear-gradient(135deg,#fae8ff,#dbeafe);}</style></head>
+<body><div class="app">
+<section id="start" class="hero">
+<div class="big">🔮</div><h1>VƯƠNG QUỐC PHÓNG TO</h1><p class="sub">Bài 24 – Gấp một số lên một số lần</p>
+<div class="rule"><b>Mục tiêu:</b><ul><li>Hiểu “gấp lên một số lần” là phép nhân.</li><li>Tìm số lần hoặc số ban đầu.</li><li>Giải bài toán thực tế về gấp lên nhiều lần.</li></ul></div>
+<button class="primary" onclick="startGame()">Bắt đầu</button>
+<button class="secondary" onclick="alert('Trò chơi gồm 3 vòng, 15 câu. Mỗi câu đúng được 10 điểm. Có 3 trái tim và 30 giây cho mỗi câu.')">Cách chơi</button>
+</section>
+
+<section id="game" class="hidden">
+<div class="top"><div><div class="title">VƯƠNG QUỐC PHÓNG TO</div><div>Bài 24 – Gấp một số lên một số lần</div></div>
+<div class="stats"><div class="pill">⭐ <span id="score">0</span></div><div class="pill">❤️ <span id="lives">3</span></div><div class="pill">⏱️ <span id="timer">30</span>s</div></div></div>
+<div class="mission">🔮 Dùng phép màu để làm mọi vật lớn lên đúng số lần!</div>
+<div class="progress"><div id="bar"></div></div>
+<div class="card"><div id="round" class="round"></div><div id="qno" class="qno"></div><div id="question" class="question"></div>
+<div id="interactive"></div><div id="feedback" class="feedback"></div>
+<div class="controls"><button class="secondary" onclick="showHint()">💡 Gợi ý</button><button id="nextBtn" class="primary hidden" onclick="nextQuestion()">Tiếp theo ➜</button></div></div>
+</section>
+
+<section id="end" class="card end hidden"><div class="medal">🏅</div><h2>Hoàn thành nhiệm vụ!</h2>
+<p style="font-size:22px">Em đạt <b><span id="finalScore">0</span>/<span id="maxScore">0</span></b> điểm.</p>
+<p style="font-size:24px;font-weight:800">PHÙ THỦ PHÓNG TO</p><button class="primary" onclick="location.reload()">Chơi lại</button></section>
+</div>
+
+<script>
+const questions=[{"round": "Vòng 1 – Phóng to phép màu", "q": "Gấp 6 lên 4 lần được:", "type": "mcq", "options": ["A. 10", "B. 24", "C. 18", "D. 20"], "answer": 1, "explain": "6 × 4 = 24.", "hint": "Gấp lên mấy lần thì nhân với số lần."}, {"round": "Vòng 1 – Phóng to phép màu", "q": "Gấp 8 lên 3 lần được:", "type": "mcq", "options": ["A. 11", "B. 16", "C. 24", "D. 32"], "answer": 2, "explain": "8 × 3 = 24.", "hint": "Nhân 8 với 3."}, {"round": "Vòng 1 – Phóng to phép màu", "q": "Gấp 9 lên 5 lần được:", "type": "mcq", "options": ["A. 45", "B. 14", "C. 36", "D. 40"], "answer": 0, "explain": "9 × 5 = 45.", "hint": "Dùng bảng nhân 5."}, {"round": "Vòng 1 – Phóng to phép màu", "q": "Số 7 gấp lên 6 lần là:", "type": "mcq", "options": ["A. 13", "B. 36", "C. 42", "D. 49"], "answer": 2, "explain": "7 × 6 = 42.", "hint": "7 nhân 6."}, {"round": "Vòng 1 – Phóng to phép màu", "q": "Gấp 12 lên 3 lần được:", "type": "mcq", "options": ["A. 15", "B. 24", "C. 36", "D. 42"], "answer": 2, "explain": "12 × 3 = 36.", "hint": "12 nhân 3."}, {"round": "Vòng 2 – Cổng biến hình", "q": "Muốn gấp một số lên 5 lần, ta làm gì?", "type": "mcq", "options": ["A. Cộng 5", "B. Trừ 5", "C. Nhân với 5", "D. Chia cho 5"], "answer": 2, "explain": "Gấp lên 5 lần = nhân với 5.", "hint": "Từ khóa “gấp lên”."}, {"round": "Vòng 2 – Cổng biến hình", "q": "Điền số: 8 gấp lên ? lần được 32", "type": "input", "answer": "4", "explain": "32 : 8 = 4.", "hint": "Tìm số lần."}, {"round": "Vòng 2 – Cổng biến hình", "q": "So sánh: gấp 5 lên 6 lần … gấp 10 lên 3 lần", "type": "select", "options": [">", "<", "="], "answer": "=", "explain": "5×6=30 và 10×3=30.", "hint": "Tính hai kết quả."}, {"round": "Vòng 2 – Cổng biến hình", "q": "Số nào là kết quả của việc gấp 13 lên 4 lần?", "type": "mcq", "options": ["A. 17", "B. 39", "C. 52", "D. 48"], "answer": 2, "explain": "13 × 4 = 52.", "hint": "13 nhân 4."}, {"round": "Vòng 2 – Cổng biến hình", "q": "Một số gấp lên 3 lần được 27. Số đó là:", "type": "input", "answer": "9", "explain": "27 : 3 = 9.", "hint": "Tìm số ban đầu bằng phép chia."}, {"round": "Vòng 3 – Khu vườn khổng lồ", "q": "Lan có 6 bông hoa, Mai có số hoa gấp 4 lần Lan. Mai có bao nhiêu bông?", "type": "input", "answer": "24", "explain": "6 × 4 = 24.", "hint": "Gấp 4 lần."}, {"round": "Vòng 3 – Khu vườn khổng lồ", "q": "Một dây ruy băng dài 8 cm. Dây thứ hai dài gấp 5 lần. Dây thứ hai dài bao nhiêu cm?", "type": "input", "answer": "40", "explain": "8 × 5 = 40 cm.", "hint": "8 nhân 5."}, {"round": "Vòng 3 – Khu vườn khổng lồ", "q": "Một giỏ có 7 quả cam. Giỏ lớn có số cam gấp 6 lần. Giỏ lớn có bao nhiêu quả?", "type": "input", "answer": "42", "explain": "7 × 6 = 42.", "hint": "7 nhân 6."}, {"round": "Vòng 3 – Khu vườn khổng lồ", "q": "An có 9 nhãn vở, Bình có số nhãn vở gấp 3 lần An. Bình có bao nhiêu?", "type": "input", "answer": "27", "explain": "9 × 3 = 27.", "hint": "9 nhân 3."}, {"round": "Vòng 3 – Khu vườn khổng lồ", "q": "Một cây non cao 12 cm. Cây lớn cao gấp 4 lần. Cây lớn cao bao nhiêu cm?", "type": "input", "answer": "48", "explain": "12 × 4 = 48 cm.", "hint": "12 nhân 4."}]; let idx=0,score=0,lives=3,timeLeft=30,timerId=null,locked=false; const maxScore=questions.length*10;
+function startGame(){document.getElementById('start').classList.add('hidden');document.getElementById('game').classList.remove('hidden');render();}
+function startTimer(){clearInterval(timerId);timeLeft=30;document.getElementById('timer').textContent=timeLeft;timerId=setInterval(()=>{timeLeft--;document.getElementById('timer').textContent=timeLeft;if(timeLeft<=0){clearInterval(timerId);wrong(true);}},1000);}
+function norm(v){return String(v).trim().toLowerCase().replace(/\s+/g,'');}
+function render(){locked=false;const q=questions[idx];
+document.getElementById('round').textContent=q.round;document.getElementById('qno').textContent=`Câu ${idx+1}/${questions.length}`;document.getElementById('question').innerHTML=q.q;
+document.getElementById('feedback').innerHTML='';document.getElementById('nextBtn').classList.add('hidden');document.getElementById('bar').style.width=(idx/questions.length*100)+'%';
+const box=document.getElementById('interactive');box.innerHTML='';
+if(q.type==='mcq'){const wrap=document.createElement('div');wrap.className='options';q.options.forEach((op,i)=>{const b=document.createElement('button');b.className='option';b.innerHTML=op;b.onclick=()=>checkMCQ(i,b);wrap.appendChild(b);});box.appendChild(wrap);}
+else if(q.type==='input'){const inp=document.createElement('input');inp.id='ans';inp.placeholder='Nhập đáp án...';box.appendChild(inp);const b=document.createElement('button');b.className='primary';b.style.marginTop='12px';b.textContent='Kiểm tra';b.onclick=checkInput;box.appendChild(b);}
+else if(q.type==='select'){const s=document.createElement('select');s.id='sel';q.options.forEach(op=>{const o=document.createElement('option');o.value=op;o.textContent=op;s.appendChild(o);});box.appendChild(s);const b=document.createElement('button');b.className='primary';b.style.marginTop='12px';b.textContent='Kiểm tra';b.onclick=checkSelect;box.appendChild(b);}
+startTimer();}
+function checkMCQ(i,b){if(locked)return;const q=questions[idx];if(i===q.answer){b.classList.add('correct');correct();}else{b.classList.add('wrong');wrong(false);}}
+function checkInput(){if(locked)return;const q=questions[idx],v=document.getElementById('ans').value;if(norm(v)===norm(q.answer))correct();else wrong(false);}
+function checkSelect(){if(locked)return;const q=questions[idx],v=document.getElementById('sel').value;if(norm(v)===norm(q.answer))correct();else wrong(false);}
+function correct(){locked=true;clearInterval(timerId);score+=10;document.getElementById('score').textContent=score;const q=questions[idx];
+document.getElementById('feedback').innerHTML='✅ Chính xác! '+q.explain;document.getElementById('nextBtn').classList.remove('hidden');document.getElementById('bar').style.width=((idx+1)/questions.length*100)+'%';}
+function wrong(timeout){if(locked)return;lives=Math.max(0,lives-1);document.getElementById('lives').textContent=lives;const q=questions[idx];
+document.getElementById('feedback').innerHTML=(timeout?'⏰ Hết giờ! ':'❌ Chưa đúng. ')+(q.hint||'Thử lại nhé!');
+if(lives<=0){locked=true;clearInterval(timerId);document.getElementById('feedback').innerHTML+=' <b>Hết trái tim, chuyển câu tiếp theo.</b>';document.getElementById('nextBtn').classList.remove('hidden');} else if(timeout) startTimer();}
+function showHint(){document.getElementById('feedback').innerHTML='💡 '+questions[idx].hint;}
+function nextQuestion(){idx++;if(idx>=questions.length)finish();else render();}
+function finish(){clearInterval(timerId);document.getElementById('game').classList.add('hidden');document.getElementById('end').classList.remove('hidden');document.getElementById('finalScore').textContent=score;document.getElementById('maxScore').textContent=maxScore;}
+</script></body></html>

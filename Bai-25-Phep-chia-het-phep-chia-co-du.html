@@ -1,97 +1,85 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bài 25: Nhà máy bánh kẹo phép thuật</title>
-    <style>
-        :root { --primary: #FFB703; --success: #2EC4B6; --danger: #E63946; --bg: #FFF3BF; --card: #FFFFFF; --text: #D4A373; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
-        body { background-color: var(--bg); color: #333; min-height: 100vh; display: flex; flex-direction: column; }
-        header { background: #FB8500; color: white; padding: 1.5rem; text-align: center; }
-        .container { max-width: 700px; margin: 2rem auto; padding: 0 1rem; width: 100%; }
-        .game-window { background: var(--card); border-radius: 20px; padding: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .rounds-stepper { display: flex; gap: 10px; margin-bottom: 2rem; }
-        .step-pill { flex: 1; background: #FFE6A7; text-align: center; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; color: #BB9457; }
-        .step-pill.active { background: #FB8500; color: white; }
-        .step-pill.completed { background: var(--success); color: white; }
-        .question-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.5; color: #432818; }
-        .options-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        @media (max-width: 600px) { .options-list { grid-template-columns: 1fr; } }
-        .btn-option { background: #FFF9EC; border: 2px solid #FFE6A7; padding: 1rem; border-radius: 12px; font-size: 0.95rem; font-weight: 600; color: #432818; cursor: pointer; text-align: left; }
-        .btn-option:hover { border-color: #FB8500; background: #FFE6A7; }
-        .alert-box { margin-top: 1.5rem; padding: 1rem; border-radius: 12px; display: none; font-weight: 600; }
-        .alert-box.correct { background: #D4EDDA; color: #155724; }
-        .alert-box.wrong { background: #F8D7DA; color: #721C24; }
-        .btn-next { margin-top: 1.5rem; background: var(--success); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; display: none; float: right; }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Bài 25: NHÀ MÁY BÁNH KẸO PHÉP THUẬT</h1>
-        <p>Môn: Toán 3 - Kết nối tri thức với cuộc sống</p>
-    </header>
-    <div class="container">
-        <div class="game-window">
-            <div class="rounds-stepper">
-                <div id="pill-0" class="step-pill active">Vòng 1: Khởi động</div>
-                <div id="pill-1" class="step-pill">Vòng 2: Vượt chướng</div>
-                <div id="pill-2" class="step-pill">Vòng 3: Về đích</div>
-            </div>
-            <div class="question-title" id="q-title"></div>
-            <div class="options-list" id="opts-container"></div>
-            <div id="result-alert" class="alert-box"></div>
-            <div style="overflow: hidden;">
-                <button id="btn-continue" class="btn-next" onclick="nextRound()">Tiếp tục ►</button>
-            </div>
-        </div>
-    </div>
-    <script>
-        const rounds = [
-            { title: "Vòng 1: Phép chia nào dưới đây thuộc loại PHÉP CHIA CÓ DƯ?", options: ["A. 24 ÷ 4", "B. 35 ÷ 5", "C. 27 ÷ 5", "D. 18 ÷ 2"], ans: 2 },
-            { title: "Vòng 2: Thực hiện phép chia: 38 ÷ 5 thu được thương và số dư là bao nhiêu?", options: ["A. Thương 7, dư 3", "B. Thương 7, dư 2", "C. Thương 6, dư 8", "D. Thương 8, dư 2"], ans: 0 },
-            { title: "Vòng 3: Có 43 cái kẹo đóng vào túi, mỗi túi 5 cái. Cần ÍT NHẤT bao nhiêu túi để chứa hết kẹo?", options: ["A. 8 túi", "B. 9 túi", "C. 10 túi", "D. 7 túi"], ans: 1 }
-        ];
-        let currentRound = 0;
-        function renderRound() {
-            for (let i = 0; i < 3; i++) {
-                const pill = document.getElementById(`pill-${i}`);
-                pill.className = 'step-pill' + (i < currentRound ? ' completed' : i === currentRound ? ' active' : '');
-            }
-            const data = rounds[currentRound];
-            document.getElementById('q-title').innerText = data.title;
-            const optsBox = document.getElementById('opts-container');
-            optsBox.innerHTML = '';
-            document.getElementById('result-alert').style.display = 'none';
-            document.getElementById('btn-continue').style.display = 'none';
-            data.options.forEach((optText, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'btn-option';
-                btn.innerText = optText;
-                btn.onclick = () => processAnswer(index);
-                optsBox.appendChild(btn);
-            });
-        }
-        function processAnswer(choice) {
-            const data = rounds[currentRound];
-            const alertBox = document.getElementById('result-alert');
-            document.querySelectorAll('.btn-option').forEach(b => b.disabled = true);
-            if (choice === data.ans) {
-                alertBox.className = 'alert-box correct';
-                alertBox.innerText = '🎉 Chính xác! Bánh kẹo đã được đóng gói vừa vặn.';
-            } else {
-                alertBox.className = 'alert-box wrong';
-                alertBox.innerText = '❌ Chưa chính xác! Đáp án đúng là: ' + data.options[data.ans];
-            }
-            alertBox.style.display = 'block';
-            document.getElementById('btn-continue').style.display = 'block';
-        }
-        function nextRound() {
-            currentRound++;
-            if (currentRound < 3) renderRound();
-            else { alert('🏆 Chúc mừng bạn đã hoàn thành xuất sắc ca làm việc tại xưởng bánh kẹo!'); location.reload(); }
-        }
-        renderRound();
-    </script>
-</body>
-</html>
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MỎ NGỌC CHIA HẾT – CHIA DƯ</title><style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#1f2937}
+.app{max-width:1100px;margin:0 auto;padding:20px}
+.hero,.card{background:rgba(255,255,255,.94);border-radius:26px;padding:24px;box-shadow:0 12px 34px rgba(0,0,0,.12)}
+.hero{text-align:center}
+.big{font-size:78px}
+h1{margin:8px 0 6px;font-size:36px}
+.sub{font-size:18px;line-height:1.55}
+.rule{background:#fff7ed;border-left:6px solid #fb923c;border-radius:14px;padding:14px;text-align:left;margin:16px 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0}
+.title{font-size:29px;font-weight:800}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.pill{background:#fff;padding:10px 14px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.08);font-weight:700}
+.progress{height:14px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:12px 0 18px}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#06b6d4);transition:.3s}
+.mission{background:rgba(255,255,255,.8);border-radius:18px;padding:12px 16px;margin-bottom:14px;font-weight:800}
+.round{font-size:23px;font-weight:800}
+.qno{font-size:14px;opacity:.72}
+.question{font-size:23px;line-height:1.5;font-weight:700;margin:14px 0 18px}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+button{border:0;border-radius:14px;padding:13px 18px;font-size:17px;font-weight:700;cursor:pointer;transition:.15s}
+button:hover{transform:translateY(-1px)}
+.primary{background:#2563eb;color:white}
+.secondary{background:#eef2ff;color:#3730a3}
+.option{background:#f3f4f6;color:#111827}
+.option.correct{background:#bbf7d0;color:#166534}
+.option.wrong{background:#fecaca;color:#991b1b}
+input,select{width:100%;padding:14px;border:2px solid #d1d5db;border-radius:12px;font-size:20px}
+.feedback{min-height:36px;margin-top:14px;font-size:18px;font-weight:700}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.hidden{display:none!important}
+.end{text-align:center}.medal{font-size:84px}
+@media(max-width:700px){.options{grid-template-columns:1fr}.question{font-size:20px}h1{font-size:29px}.card,.hero{padding:18px}}
+ body{background:linear-gradient(135deg,#cffafe,#dcfce7);}</style></head>
+<body><div class="app">
+<section id="start" class="hero">
+<div class="big">💎</div><h1>MỎ NGỌC CHIA HẾT – CHIA DƯ</h1><p class="sub">Bài 25 – Phép chia hết, phép chia có dư</p>
+<div class="rule"><b>Mục tiêu:</b><ul><li>Nhận biết phép chia hết và phép chia có dư.</li><li>Biết số dư luôn nhỏ hơn số chia.</li><li>Vận dụng chia có dư trong tình huống thực tế.</li></ul></div>
+<button class="primary" onclick="startGame()">Bắt đầu</button>
+<button class="secondary" onclick="alert('Trò chơi gồm 3 vòng, 15 câu. Mỗi câu đúng được 10 điểm. Có 3 trái tim và 30 giây cho mỗi câu.')">Cách chơi</button>
+</section>
+
+<section id="game" class="hidden">
+<div class="top"><div><div class="title">MỎ NGỌC CHIA HẾT – CHIA DƯ</div><div>Bài 25 – Phép chia hết, phép chia có dư</div></div>
+<div class="stats"><div class="pill">⭐ <span id="score">0</span></div><div class="pill">❤️ <span id="lives">3</span></div><div class="pill">⏱️ <span id="timer">30</span>s</div></div></div>
+<div class="mission">💎 Phân loại viên ngọc theo phép chia hết và phép chia có dư!</div>
+<div class="progress"><div id="bar"></div></div>
+<div class="card"><div id="round" class="round"></div><div id="qno" class="qno"></div><div id="question" class="question"></div>
+<div id="interactive"></div><div id="feedback" class="feedback"></div>
+<div class="controls"><button class="secondary" onclick="showHint()">💡 Gợi ý</button><button id="nextBtn" class="primary hidden" onclick="nextQuestion()">Tiếp theo ➜</button></div></div>
+</section>
+
+<section id="end" class="card end hidden"><div class="medal">🏅</div><h2>Hoàn thành nhiệm vụ!</h2>
+<p style="font-size:22px">Em đạt <b><span id="finalScore">0</span>/<span id="maxScore">0</span></b> điểm.</p>
+<p style="font-size:24px;font-weight:800">THỢ SĂN NGỌC PHÉP CHIA</p><button class="primary" onclick="location.reload()">Chơi lại</button></section>
+</div>
+
+<script>
+const questions=[{"round": "Vòng 1 – Phân loại viên ngọc", "q": "17 : 5 được:", "type": "mcq", "options": ["A. 3 dư 2", "B. 3 dư 1", "C. 2 dư 3", "D. 4 dư 1"], "answer": 0, "explain": "17 : 5 = 3 dư 2.", "hint": "5×3=15, còn 2."}, {"round": "Vòng 1 – Phân loại viên ngọc", "q": "24 : 6 là phép chia:", "type": "mcq", "options": ["A. Có dư", "B. Chia hết", "C. Dư 6", "D. Dư 4"], "answer": 1, "explain": "24 : 6 = 4, dư 0.", "hint": "Nếu số dư bằng 0 thì chia hết."}, {"round": "Vòng 1 – Phân loại viên ngọc", "q": "29 : 4 được:", "type": "mcq", "options": ["A. 7 dư 1", "B. 6 dư 5", "C. 7 dư 2", "D. 8 dư 1"], "answer": 0, "explain": "4×7=28, còn 1.", "hint": "Tìm bội của 4 gần 29 nhất mà không vượt 29."}, {"round": "Vòng 1 – Phân loại viên ngọc", "q": "35 : 5 = ?", "type": "mcq", "options": ["A. 6 dư 5", "B. 7", "C. 5 dư 5", "D. 8"], "answer": 1, "explain": "35 : 5 = 7.", "hint": "Bảng chia 5."}, {"round": "Vòng 1 – Phân loại viên ngọc", "q": "43 : 6 được:", "type": "mcq", "options": ["A. 7 dư 1", "B. 6 dư 7", "C. 7 dư 2", "D. 8 dư 1"], "answer": 0, "explain": "6×7=42, dư 1.", "hint": "Số dư phải nhỏ hơn 6."}, {"round": "Vòng 2 – Cổng kiểm tra số dư", "q": "Trong phép chia cho 7, số dư lớn nhất là:", "type": "input", "answer": "6", "explain": "Số dư luôn nhỏ hơn số chia.", "hint": "Số lớn nhất nhỏ hơn 7."}, {"round": "Vòng 2 – Cổng kiểm tra số dư", "q": "Phép chia nào có dư?", "type": "mcq", "options": ["A. 32 : 4", "B. 45 : 5", "C. 26 : 3", "D. 42 : 6"], "answer": 2, "explain": "26 : 3 = 8 dư 2.", "hint": "Ba phép còn lại chia hết."}, {"round": "Vòng 2 – Cổng kiểm tra số dư", "q": "Điền số dư: 38 : 5 = 7 dư ?", "type": "input", "answer": "3", "explain": "38 = 5×7 + 3.", "hint": "35 gần 38 nhất."}, {"round": "Vòng 2 – Cổng kiểm tra số dư", "q": "Số dư nào không thể có trong phép chia cho 4?", "type": "mcq", "options": ["A. 0", "B. 1", "C. 3", "D. 4"], "answer": 3, "explain": "Số dư phải nhỏ hơn 4.", "hint": "Không được bằng số chia."}, {"round": "Vòng 2 – Cổng kiểm tra số dư", "q": "47 : 6 = ?", "type": "input", "answer": "7dư5", "explain": "47 : 6 = 7 dư 5.", "hint": "6×7=42, còn 5. Nhập: 7 dư 5"}, {"round": "Vòng 3 – Xếp hàng vào kho", "q": "Có 23 quả bóng, xếp 5 quả vào mỗi hộp. Xếp được đầy mấy hộp và thừa mấy quả?", "type": "mcq", "options": ["A. 4 hộp, dư 3", "B. 5 hộp, dư 2", "C. 3 hộp, dư 4", "D. 4 hộp, dư 2"], "answer": 0, "explain": "23 : 5 = 4 dư 3.", "hint": "5×4=20."}, {"round": "Vòng 3 – Xếp hàng vào kho", "q": "Có 28 chiếc bánh chia đều cho 4 bạn. Mỗi bạn được bao nhiêu chiếc?", "type": "input", "answer": "7", "explain": "28 : 4 = 7.", "hint": "Đây là phép chia hết."}, {"round": "Vòng 3 – Xếp hàng vào kho", "q": "Có 31 quyển vở, mỗi chồng 6 quyển. Xếp được đầy mấy chồng?", "type": "input", "answer": "5", "explain": "31 : 6 = 5 dư 1, nên có 5 chồng đầy.", "hint": "6×5=30."}, {"round": "Vòng 3 – Xếp hàng vào kho", "q": "Có 40 viên bi chia đều vào 8 túi. Có dư không?", "type": "mcq", "options": ["A. Dư 5", "B. Dư 0", "C. Dư 8", "D. Dư 4"], "answer": 1, "explain": "40 : 8 = 5, dư 0.", "hint": "40 chia hết cho 8."}, {"round": "Vòng 3 – Xếp hàng vào kho", "q": "Có 50 quả cam, chia vào các túi, mỗi túi 7 quả. Có bao nhiêu túi đầy và dư mấy quả?", "type": "mcq", "options": ["A. 7 túi, dư 1", "B. 6 túi, dư 8", "C. 7 túi, dư 2", "D. 8 túi, dư 1"], "answer": 0, "explain": "50 : 7 = 7 dư 1.", "hint": "7×7=49."}]; let idx=0,score=0,lives=3,timeLeft=30,timerId=null,locked=false; const maxScore=questions.length*10;
+function startGame(){document.getElementById('start').classList.add('hidden');document.getElementById('game').classList.remove('hidden');render();}
+function startTimer(){clearInterval(timerId);timeLeft=30;document.getElementById('timer').textContent=timeLeft;timerId=setInterval(()=>{timeLeft--;document.getElementById('timer').textContent=timeLeft;if(timeLeft<=0){clearInterval(timerId);wrong(true);}},1000);}
+function norm(v){return String(v).trim().toLowerCase().replace(/\s+/g,'');}
+function render(){locked=false;const q=questions[idx];
+document.getElementById('round').textContent=q.round;document.getElementById('qno').textContent=`Câu ${idx+1}/${questions.length}`;document.getElementById('question').innerHTML=q.q;
+document.getElementById('feedback').innerHTML='';document.getElementById('nextBtn').classList.add('hidden');document.getElementById('bar').style.width=(idx/questions.length*100)+'%';
+const box=document.getElementById('interactive');box.innerHTML='';
+if(q.type==='mcq'){const wrap=document.createElement('div');wrap.className='options';q.options.forEach((op,i)=>{const b=document.createElement('button');b.className='option';b.innerHTML=op;b.onclick=()=>checkMCQ(i,b);wrap.appendChild(b);});box.appendChild(wrap);}
+else if(q.type==='input'){const inp=document.createElement('input');inp.id='ans';inp.placeholder='Nhập đáp án...';box.appendChild(inp);const b=document.createElement('button');b.className='primary';b.style.marginTop='12px';b.textContent='Kiểm tra';b.onclick=checkInput;box.appendChild(b);}
+else if(q.type==='select'){const s=document.createElement('select');s.id='sel';q.options.forEach(op=>{const o=document.createElement('option');o.value=op;o.textContent=op;s.appendChild(o);});box.appendChild(s);const b=document.createElement('button');b.className='primary';b.style.marginTop='12px';b.textContent='Kiểm tra';b.onclick=checkSelect;box.appendChild(b);}
+startTimer();}
+function checkMCQ(i,b){if(locked)return;const q=questions[idx];if(i===q.answer){b.classList.add('correct');correct();}else{b.classList.add('wrong');wrong(false);}}
+function checkInput(){if(locked)return;const q=questions[idx],v=document.getElementById('ans').value;if(norm(v)===norm(q.answer))correct();else wrong(false);}
+function checkSelect(){if(locked)return;const q=questions[idx],v=document.getElementById('sel').value;if(norm(v)===norm(q.answer))correct();else wrong(false);}
+function correct(){locked=true;clearInterval(timerId);score+=10;document.getElementById('score').textContent=score;const q=questions[idx];
+document.getElementById('feedback').innerHTML='✅ Chính xác! '+q.explain;document.getElementById('nextBtn').classList.remove('hidden');document.getElementById('bar').style.width=((idx+1)/questions.length*100)+'%';}
+function wrong(timeout){if(locked)return;lives=Math.max(0,lives-1);document.getElementById('lives').textContent=lives;const q=questions[idx];
+document.getElementById('feedback').innerHTML=(timeout?'⏰ Hết giờ! ':'❌ Chưa đúng. ')+(q.hint||'Thử lại nhé!');
+if(lives<=0){locked=true;clearInterval(timerId);document.getElementById('feedback').innerHTML+=' <b>Hết trái tim, chuyển câu tiếp theo.</b>';document.getElementById('nextBtn').classList.remove('hidden');} else if(timeout) startTimer();}
+function showHint(){document.getElementById('feedback').innerHTML='💡 '+questions[idx].hint;}
+function nextQuestion(){idx++;if(idx>=questions.length)finish();else render();}
+function finish(){clearInterval(timerId);document.getElementById('game').classList.add('hidden');document.getElementById('end').classList.remove('hidden');document.getElementById('finalScore').textContent=score;document.getElementById('maxScore').textContent=maxScore;}
+</script></body></html>

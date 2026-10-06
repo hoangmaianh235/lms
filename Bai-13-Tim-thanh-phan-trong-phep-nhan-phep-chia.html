@@ -1,97 +1,85 @@
-<!DOCTYPE html>
-<lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bài 13: Cảnh sát vũ trụ - Truy bắt ẩn số</title>
-    <style>
-        :root { --primary: #4361EE; --success: #2EC4B6; --danger: #E63946; --bg: #0B132B; --card: #1C2541; --text: #FFFFFF; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
-        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-        header { background: #1C2541; border-bottom: 2px solid var(--primary); color: white; padding: 1.5rem; text-align: center; }
-        .container { max-width: 700px; margin: 2rem auto; padding: 0 1rem; width: 100%; }
-        .game-window { background: var(--card); border-radius: 20px; padding: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .rounds-stepper { display: flex; gap: 10px; margin-bottom: 2rem; }
-        .step-pill { flex: 1; background: #3A506B; text-align: center; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; color: #8D99AE; }
-        .step-pill.active { background: var(--primary); color: white; }
-        .step-pill.completed { background: var(--success); color: white; }
-        .question-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.5; }
-        .options-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        @media (max-width: 600px) { .options-list { grid-template-columns: 1fr; } }
-        .btn-option { background: #3A506B; border: 2px solid transparent; padding: 1rem; border-radius: 12px; font-size: 0.95rem; font-weight: 600; color: white; cursor: pointer; text-align: left; }
-        .btn-option:hover { border-color: var(--primary); background: #5BC0BE; color: #0B132B; }
-        .alert-box { margin-top: 1.5rem; padding: 1rem; border-radius: 12px; display: none; font-weight: 600; }
-        .alert-box.correct { background: #17C3B2; color: #0B132B; }
-        .alert-box.wrong { background: #FE6D73; color: #0B132B; }
-        .btn-next { margin-top: 1.5rem; background: var(--success); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; display: none; float: right; }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Bài 13: CẢNH SÁT VŨ TRỤ - TRUY BẮT ẨN SỐ</h1>
-        <p>Môn: Toán 3 - Kết nối tri thức với cuộc sống</p>
-    </header>
-    <div class="container">
-        <div class="game-window">
-            <div class="rounds-stepper">
-                <div id="pill-0" class="step-pill active">Vòng 1: Khởi động</div>
-                <div id="pill-1" class="step-pill">Vòng 2: Vượt chướng</div>
-                <div id="pill-2" class="step-pill">Vòng 3: Về đích</div>
-            </div>
-            <div class="question-title" id="q-title"></div>
-            <div class="options-list" id="opts-container"></div>
-            <div id="result-alert" class="alert-box"></div>
-            <div style="overflow: hidden;">
-                <button id="btn-continue" class="btn-next" onclick="nextRound()">Tiếp tục ►</button>
-            </div>
-        </div>
-    </div>
-    <script>
-        const rounds = [
-            { title: "Vòng 1: Cho phép tính 'X ÷ 8 = 7'. Thành phần X được gọi là gì?", options: ["A. Số chia", "B. Số bị chia", "C. Thương", "D. Thừa số"], ans: 1 },
-            { title: "Vòng 2: Kích hoạt radar tìm ẩn số X, biết: 32 ÷ X = 4", options: ["A. X = 6", "B. X = 7", "C. X = 8", "D. X = 9"], ans: 2 },
-            { title: "Vòng 3: Đội đóng 48 viên năng lượng vào X khoang, mỗi khoang chứa 8 viên thì vừa đủ. Tìm X:", options: ["A. X = 6 khoang", "B. X = 7 khoang", "C. X = 8 khoang", "D. X = 9 khoang"], ans: 0 }
-        ];
-        let currentRound = 0;
-        function renderRound() {
-            for (let i = 0; i < 3; i++) {
-                const pill = document.getElementById(`pill-${i}`);
-                pill.className = 'step-pill' + (i < currentRound ? ' completed' : i === currentRound ? ' active' : '');
-            }
-            const data = rounds[currentRound];
-            document.getElementById('q-title').innerText = data.title;
-            const optsBox = document.getElementById('opts-container');
-            optsBox.innerHTML = '';
-            document.getElementById('result-alert').style.display = 'none';
-            document.getElementById('btn-continue').style.display = 'none';
-            data.options.forEach((optText, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'btn-option';
-                btn.innerText = optText;
-                btn.onclick = () => processAnswer(index);
-                optsBox.appendChild(btn);
-            });
-        }
-        function processAnswer(choice) {
-            const data = rounds[currentRound];
-            const alertBox = document.getElementById('result-alert');
-            document.querySelectorAll('.btn-option').forEach(b => b.disabled = true);
-            if (choice === data.ans) {
-                alertBox.className = 'alert-box correct';
-                alertBox.innerText = '🎉 Chính xác! Tên lửa đã được kích hoạt.';
-            } else {
-                alertBox.className = 'alert-box wrong';
-                alertBox.innerText = '❌ Chưa chính xác! Đáp án đúng là: ' + data.options[data.ans];
-            }
-            alertBox.style.display = 'block';
-            document.getElementById('btn-continue').style.display = 'block';
-        }
-        function nextRound() {
-            currentRound++;
-            if (currentRound < 3) renderRound();
-            else { alert('🏆 Chúc mừng Cảnh sát vũ trụ đã bắt được ẩn số!'); location.reload(); }
-        }
-        renderRound();
-    </script>
-</body>
-</html>
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PHÒNG THÍ NGHIỆM MẬT MÃ</title><style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#1f2937}
+.app{max-width:1100px;margin:0 auto;padding:20px}
+.hero,.card{background:rgba(255,255,255,.94);border-radius:26px;padding:24px;box-shadow:0 12px 34px rgba(0,0,0,.12)}
+.hero{text-align:center}
+.big{font-size:78px}
+h1{margin:8px 0 6px;font-size:36px}
+.sub{font-size:18px;line-height:1.55}
+.rule{background:#fff7ed;border-left:6px solid #fb923c;border-radius:14px;padding:14px;text-align:left;margin:16px 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0}
+.title{font-size:29px;font-weight:800}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.pill{background:#fff;padding:10px 14px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.08);font-weight:700}
+.progress{height:14px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:12px 0 18px}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#06b6d4);transition:.3s}
+.mission{background:rgba(255,255,255,.8);border-radius:18px;padding:12px 16px;margin-bottom:14px;font-weight:800}
+.round{font-size:23px;font-weight:800}
+.qno{font-size:14px;opacity:.72}
+.question{font-size:23px;line-height:1.5;font-weight:700;margin:14px 0 18px}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+button{border:0;border-radius:14px;padding:13px 18px;font-size:17px;font-weight:700;cursor:pointer;transition:.15s}
+button:hover{transform:translateY(-1px)}
+.primary{background:#2563eb;color:white}
+.secondary{background:#eef2ff;color:#3730a3}
+.option{background:#f3f4f6;color:#111827}
+.option.correct{background:#bbf7d0;color:#166534}
+.option.wrong{background:#fecaca;color:#991b1b}
+input,select{width:100%;padding:14px;border:2px solid #d1d5db;border-radius:12px;font-size:20px}
+.feedback{min-height:36px;margin-top:14px;font-size:18px;font-weight:700}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.hidden{display:none!important}
+.end{text-align:center}.medal{font-size:84px}
+@media(max-width:700px){.options{grid-template-columns:1fr}.question{font-size:20px}h1{font-size:29px}.card,.hero{padding:18px}}
+ body{background:linear-gradient(135deg,#dbeafe,#ede9fe);}</style></head>
+<body><div class="app">
+<section id="start" class="hero">
+<div class="big">🧪</div><h1>PHÒNG THÍ NGHIỆM MẬT MÃ</h1><p class="sub">Bài 13 – Tìm thành phần trong phép nhân, phép chia</p>
+<div class="rule"><b>Mục tiêu:</b><ul><li>Tìm thừa số chưa biết.</li><li>Tìm số bị chia và số chia.</li><li>Vận dụng quan hệ nhân – chia vào tình huống thực tế.</li></ul></div>
+<button class="primary" onclick="startGame()">Bắt đầu</button>
+<button class="secondary" onclick="alert('Trò chơi gồm 3 vòng, 15 câu. Mỗi câu đúng được 10 điểm. Có 3 trái tim và 30 giây cho mỗi câu.')">Cách chơi</button>
+</section>
+
+<section id="game" class="hidden">
+<div class="top"><div><div class="title">PHÒNG THÍ NGHIỆM MẬT MÃ</div><div>Bài 13 – Tìm thành phần trong phép nhân, phép chia</div></div>
+<div class="stats"><div class="pill">⭐ <span id="score">0</span></div><div class="pill">❤️ <span id="lives">3</span></div><div class="pill">⏱️ <span id="timer">30</span>s</div></div></div>
+<div class="mission">🧪 Mở khóa công thức, ghép mảnh bí mật và hoàn thành thí nghiệm!</div>
+<div class="progress"><div id="bar"></div></div>
+<div class="card"><div id="round" class="round"></div><div id="qno" class="qno"></div><div id="question" class="question"></div>
+<div id="interactive"></div><div id="feedback" class="feedback"></div>
+<div class="controls"><button class="secondary" onclick="showHint()">💡 Gợi ý</button><button id="nextBtn" class="primary hidden" onclick="nextQuestion()">Tiếp theo ➜</button></div></div>
+</section>
+
+<section id="end" class="card end hidden"><div class="medal">🏅</div><h2>Hoàn thành nhiệm vụ!</h2>
+<p style="font-size:22px">Em đạt <b><span id="finalScore">0</span>/<span id="maxScore">0</span></b> điểm.</p>
+<p style="font-size:24px;font-weight:800">NHÀ GIẢI MÃ TOÁN HỌC</p><button class="primary" onclick="location.reload()">Chơi lại</button></section>
+</div>
+
+<script>
+const questions=[{"round": "Vòng 1 – Mở khóa công thức", "q": "Tìm x: x × 4 = 28", "type": "mcq", "options": ["A. 6", "B. 7", "C. 8", "D. 9"], "answer": 1, "explain": "x = 28 : 4 = 7.", "hint": "Muốn tìm thừa số chưa biết, lấy tích chia thừa số đã biết."}, {"round": "Vòng 1 – Mở khóa công thức", "q": "Tìm x: 6 × x = 42", "type": "mcq", "options": ["A. 6", "B. 7", "C. 8", "D. 9"], "answer": 1, "explain": "x = 42 : 6 = 7.", "hint": "Lấy tích chia 6."}, {"round": "Vòng 1 – Mở khóa công thức", "q": "Tìm x: x : 5 = 8", "type": "mcq", "options": ["A. 13", "B. 35", "C. 40", "D. 45"], "answer": 2, "explain": "x = 8 × 5 = 40.", "hint": "Muốn tìm số bị chia, lấy thương nhân số chia."}, {"round": "Vòng 1 – Mở khóa công thức", "q": "Tìm x: 36 : x = 4", "type": "mcq", "options": ["A. 8", "B. 9", "C. 10", "D. 12"], "answer": 1, "explain": "x = 36 : 4 = 9.", "hint": "Muốn tìm số chia, lấy số bị chia chia thương."}, {"round": "Vòng 1 – Mở khóa công thức", "q": "Tìm x: x × 7 = 56", "type": "mcq", "options": ["A. 7", "B. 8", "C. 9", "D. 6"], "answer": 1, "explain": "x = 56 : 7 = 8.", "hint": "Dùng bảng chia 7."}, {"round": "Vòng 2 – Ghép mảnh bí mật", "q": "Muốn tìm thừa số chưa biết, ta làm thế nào?", "type": "mcq", "options": ["A. Lấy tích cộng thừa số đã biết", "B. Lấy tích chia thừa số đã biết", "C. Lấy tích trừ thừa số đã biết", "D. Lấy thừa số đã biết chia tích"], "answer": 1, "explain": "Quy tắc đúng: tích chia thừa số đã biết.", "hint": "Nhớ quan hệ nhân – chia."}, {"round": "Vòng 2 – Ghép mảnh bí mật", "q": "Muốn tìm số bị chia, ta:", "type": "mcq", "options": ["A. Lấy thương × số chia", "B. Lấy thương : số chia", "C. Lấy số chia : thương", "D. Lấy thương + số chia"], "answer": 0, "explain": "Số bị chia = thương × số chia.", "hint": "Ví dụ x : 4 = 6 thì x = 6 × 4."}, {"round": "Vòng 2 – Ghép mảnh bí mật", "q": "Muốn tìm số chia, ta:", "type": "mcq", "options": ["A. Lấy số bị chia × thương", "B. Lấy số bị chia : thương", "C. Lấy thương : số bị chia", "D. Lấy số bị chia + thương"], "answer": 1, "explain": "Số chia = số bị chia : thương.", "hint": "Ví dụ 24 : x = 6 thì x = 24 : 6."}, {"round": "Vòng 2 – Ghép mảnh bí mật", "q": "Điền số: 9 × ? = 63", "type": "input", "answer": "7", "explain": "63 : 9 = 7.", "hint": "Dùng bảng chia 9."}, {"round": "Vòng 2 – Ghép mảnh bí mật", "q": "Điền số: 48 : ? = 6", "type": "input", "answer": "8", "explain": "48 : 6 = 8.", "hint": "Tìm số chia."}, {"round": "Vòng 3 – Phòng thí nghiệm toán", "q": "Có 5 hộp, mỗi hộp có cùng số bút. Tất cả có 35 bút. Mỗi hộp có bao nhiêu bút?", "type": "input", "answer": "7", "explain": "35 : 5 = 7 bút.", "hint": "Tìm thừa số chưa biết."}, {"round": "Vòng 3 – Phòng thí nghiệm toán", "q": "Một số chia cho 6 được 8. Số đó là bao nhiêu?", "type": "input", "answer": "48", "explain": "8 × 6 = 48.", "hint": "Tìm số bị chia."}, {"round": "Vòng 3 – Phòng thí nghiệm toán", "q": "Có 54 quả cam chia đều vào các đĩa, mỗi đĩa 6 quả. Có bao nhiêu đĩa?", "type": "input", "answer": "9", "explain": "54 : 6 = 9 đĩa.", "hint": "Tìm số nhóm."}, {"round": "Vòng 3 – Phòng thí nghiệm toán", "q": "7 túi có tất cả 49 viên bi, các túi như nhau. Mỗi túi có bao nhiêu viên?", "type": "input", "answer": "7", "explain": "49 : 7 = 7 viên.", "hint": "Chia đều."}, {"round": "Vòng 3 – Phòng thí nghiệm toán", "q": "Một số nhân với 8 được 64. Số đó là bao nhiêu?", "type": "input", "answer": "8", "explain": "64 : 8 = 8.", "hint": "Tìm thừa số chưa biết."}]; let idx=0,score=0,lives=3,timeLeft=30,timerId=null,locked=false; const maxScore=questions.length*10;
+function startGame(){document.getElementById('start').classList.add('hidden');document.getElementById('game').classList.remove('hidden');render();}
+function startTimer(){clearInterval(timerId);timeLeft=30;document.getElementById('timer').textContent=timeLeft;timerId=setInterval(()=>{timeLeft--;document.getElementById('timer').textContent=timeLeft;if(timeLeft<=0){clearInterval(timerId);wrong(true);}},1000);}
+function norm(v){return String(v).trim().toLowerCase().replace(/\s+/g,'');}
+function render(){locked=false;const q=questions[idx];
+document.getElementById('round').textContent=q.round;document.getElementById('qno').textContent=`Câu ${idx+1}/${questions.length}`;document.getElementById('question').innerHTML=q.q;
+document.getElementById('feedback').innerHTML='';document.getElementById('nextBtn').classList.add('hidden');document.getElementById('bar').style.width=(idx/questions.length*100)+'%';
+const box=document.getElementById('interactive');box.innerHTML='';
+if(q.type==='mcq'){const wrap=document.createElement('div');wrap.className='options';q.options.forEach((op,i)=>{const b=document.createElement('button');b.className='option';b.innerHTML=op;b.onclick=()=>checkMCQ(i,b);wrap.appendChild(b);});box.appendChild(wrap);}
+else if(q.type==='input'){const inp=document.createElement('input');inp.id='ans';inp.placeholder='Nhập đáp án...';box.appendChild(inp);const b=document.createElement('button');b.className='primary';b.style.marginTop='12px';b.textContent='Kiểm tra';b.onclick=checkInput;box.appendChild(b);}
+else if(q.type==='select'){const s=document.createElement('select');s.id='sel';q.options.forEach(op=>{const o=document.createElement('option');o.value=op;o.textContent=op;s.appendChild(o);});box.appendChild(s);const b=document.createElement('button');b.className='primary';b.style.marginTop='12px';b.textContent='Kiểm tra';b.onclick=checkSelect;box.appendChild(b);}
+startTimer();}
+function checkMCQ(i,b){if(locked)return;const q=questions[idx];if(i===q.answer){b.classList.add('correct');correct();}else{b.classList.add('wrong');wrong(false);}}
+function checkInput(){if(locked)return;const q=questions[idx],v=document.getElementById('ans').value;if(norm(v)===norm(q.answer))correct();else wrong(false);}
+function checkSelect(){if(locked)return;const q=questions[idx],v=document.getElementById('sel').value;if(norm(v)===norm(q.answer))correct();else wrong(false);}
+function correct(){locked=true;clearInterval(timerId);score+=10;document.getElementById('score').textContent=score;const q=questions[idx];
+document.getElementById('feedback').innerHTML='✅ Chính xác! '+q.explain;document.getElementById('nextBtn').classList.remove('hidden');document.getElementById('bar').style.width=((idx+1)/questions.length*100)+'%';}
+function wrong(timeout){if(locked)return;lives=Math.max(0,lives-1);document.getElementById('lives').textContent=lives;const q=questions[idx];
+document.getElementById('feedback').innerHTML=(timeout?'⏰ Hết giờ! ':'❌ Chưa đúng. ')+(q.hint||'Thử lại nhé!');
+if(lives<=0){locked=true;clearInterval(timerId);document.getElementById('feedback').innerHTML+=' <b>Hết trái tim, chuyển câu tiếp theo.</b>';document.getElementById('nextBtn').classList.remove('hidden');} else if(timeout) startTimer();}
+function showHint(){document.getElementById('feedback').innerHTML='💡 '+questions[idx].hint;}
+function nextQuestion(){idx++;if(idx>=questions.length)finish();else render();}
+function finish(){clearInterval(timerId);document.getElementById('game').classList.add('hidden');document.getElementById('end').classList.remove('hidden');document.getElementById('finalScore').textContent=score;document.getElementById('maxScore').textContent=maxScore;}
+</script></body></html>
