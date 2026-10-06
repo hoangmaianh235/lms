@@ -1,97 +1,85 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bài 27: Tháo băng băng hà</title>
-    <style>
-        :root { --primary: #00B4D8; --success: #48CAE4; --danger: #E63946; --bg: #CAF0F8; --card: #FFFFFF; --text: #03045E; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
-        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-        header { background: #0077B6; color: white; padding: 1.5rem; text-align: center; }
-        .container { max-width: 700px; margin: 2rem auto; padding: 0 1rem; width: 100%; }
-        .game-window { background: var(--card); border-radius: 20px; padding: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .rounds-stepper { display: flex; gap: 10px; margin-bottom: 2rem; }
-        .step-pill { flex: 1; background: #ADE8F4; text-align: center; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; color: #03045E; }
-        .step-pill.active { background: #0077B6; color: white; }
-        .step-pill.completed { background: #00B4D8; color: white; }
-        .question-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.5; }
-        .options-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        @media (max-width: 600px) { .options-list { grid-template-columns: 1fr; } }
-        .btn-option { background: #F8F9FA; border: 2px solid #ADE8F4; padding: 1rem; border-radius: 12px; font-size: 0.95rem; font-weight: 600; color: var(--text); cursor: pointer; text-align: left; }
-        .btn-option:hover { border-color: #0077B6; background: #CAF0F8; }
-        .alert-box { margin-top: 1.5rem; padding: 1rem; border-radius: 12px; display: none; font-weight: 600; }
-        .alert-box.correct { background: #D4EDDA; color: #155724; }
-        .alert-box.wrong { background: #F8D7DA; color: #721C24; }
-        .btn-next { margin-top: 1.5rem; background: #0077B6; color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; display: none; float: right; }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Bài 27: THÁO BĂNG BĂNG HÀ</h1>
-        <p>Môn: Toán 3 - Kết nối tri thức với cuộc sống</p>
-    </header>
-    <div class="container">
-        <div class="game-window">
-            <div class="rounds-stepper">
-                <div id="pill-0" class="step-pill active">Vòng 1: Khởi động</div>
-                <div id="pill-1" class="step-pill">Vòng 2: Vượt chướng</div>
-                <div id="pill-2" class="step-pill">Vòng 3: Về đích</div>
-            </div>
-            <div class="question-title" id="q-title"></div>
-            <div class="options-list" id="opts-container"></div>
-            <div id="result-alert" class="alert-box"></div>
-            <div style="overflow: hidden;">
-                <button id="btn-continue" class="btn-next" onclick="nextRound()">Tiếp tục ►</button>
-            </div>
-        </div>
-    </div>
-    <script>
-        const rounds = [
-            { title: "Vòng 1: Chọn phép tính đúng để 'Giảm 36 đi 4 lần':", options: ["A. 36 - 4 = 32", "B. 36 ÷ 4 = 9", "C. 36 + 4 = 40", "D. 36 × 4"], ans: 1 },
-            { title: "Vòng 2: Bắn tia nhiệt: Giảm khối băng 54m đi 6 lần thu được chiều dài bao nhiêu?", options: ["A. 8 m", "B. 9 m", "C. 48 m", "D. 7 m"], ans: 1 },
-            { title: "Vòng 3: Đoạn đường băng dài 72m, sau khi xả nhiệt giảm đi 8 lần. Chiều dài còn bị đóng băng là:", options: ["A. 9 m", "B. 8 m", "C. 64 m", "D. 10 m"], ans: 0 }
-        ];
-        let currentRound = 0;
-        function renderRound() {
-            for (let i = 0; i < 3; i++) {
-                const pill = document.getElementById(`pill-${i}`);
-                pill.className = 'step-pill' + (i < currentRound ? ' completed' : i === currentRound ? ' active' : '');
-            }
-            const data = rounds[currentRound];
-            document.getElementById('q-title').innerText = data.title;
-            const optsBox = document.getElementById('opts-container');
-            optsBox.innerHTML = '';
-            document.getElementById('result-alert').style.display = 'none';
-            document.getElementById('btn-continue').style.display = 'none';
-            data.options.forEach((optText, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'btn-option';
-                btn.innerText = optText;
-                btn.onclick = () => processAnswer(index);
-                optsBox.appendChild(btn);
-            });
-        }
-        function processAnswer(choice) {
-            const data = rounds[currentRound];
-            const alertBox = document.getElementById('result-alert');
-            document.querySelectorAll('.btn-option').forEach(b => b.disabled = true);
-            if (choice === data.ans) {
-                alertBox.className = 'alert-box correct';
-                alertBox.innerText = '🎉 Chính xác! Khối băng đã thu nhỏ lại.';
-            } else {
-                alertBox.className = 'alert-box wrong';
-                alertBox.innerText = '❌ Chưa chính xác! Đáp án đúng là: ' + data.options[data.ans];
-            }
-            alertBox.style.display = 'block';
-            document.getElementById('btn-continue').style.display = 'block';
-        }
-        function nextRound() {
-            currentRound++;
-            if (currentRound < 3) renderRound();
-            else { alert('🏆 Chúc mừng đoàn thám hiểm đã vượt qua dòng sông băng!'); location.reload(); }
-        }
-        renderRound();
-    </script>
-</body>
-</html>
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>THÀNH PHỐ TÍ HON</title><style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#1f2937}
+.app{max-width:1100px;margin:0 auto;padding:20px}
+.hero,.card{background:rgba(255,255,255,.94);border-radius:26px;padding:24px;box-shadow:0 12px 34px rgba(0,0,0,.12)}
+.hero{text-align:center}
+.big{font-size:78px}
+h1{margin:8px 0 6px;font-size:36px}
+.sub{font-size:18px;line-height:1.55}
+.rule{background:#fff7ed;border-left:6px solid #fb923c;border-radius:14px;padding:14px;text-align:left;margin:16px 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0}
+.title{font-size:29px;font-weight:800}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.pill{background:#fff;padding:10px 14px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.08);font-weight:700}
+.progress{height:14px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:12px 0 18px}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#06b6d4);transition:.3s}
+.mission{background:rgba(255,255,255,.8);border-radius:18px;padding:12px 16px;margin-bottom:14px;font-weight:800}
+.round{font-size:23px;font-weight:800}
+.qno{font-size:14px;opacity:.72}
+.question{font-size:23px;line-height:1.5;font-weight:700;margin:14px 0 18px}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+button{border:0;border-radius:14px;padding:13px 18px;font-size:17px;font-weight:700;cursor:pointer;transition:.15s}
+button:hover{transform:translateY(-1px)}
+.primary{background:#2563eb;color:white}
+.secondary{background:#eef2ff;color:#3730a3}
+.option{background:#f3f4f6;color:#111827}
+.option.correct{background:#bbf7d0;color:#166534}
+.option.wrong{background:#fecaca;color:#991b1b}
+input,select{width:100%;padding:14px;border:2px solid #d1d5db;border-radius:12px;font-size:20px}
+.feedback{min-height:36px;margin-top:14px;font-size:18px;font-weight:700}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.hidden{display:none!important}
+.end{text-align:center}.medal{font-size:84px}
+@media(max-width:700px){.options{grid-template-columns:1fr}.question{font-size:20px}h1{font-size:29px}.card,.hero{padding:18px}}
+ body{background:linear-gradient(135deg,#fef3c7,#dcfce7);}</style></head>
+<body><div class="app">
+<section id="start" class="hero">
+<div class="big">🔬</div><h1>THÀNH PHỐ TÍ HON</h1><p class="sub">Bài 27 – Giảm một số đi một số lần</p>
+<div class="rule"><b>Mục tiêu:</b><ul><li>Hiểu “giảm đi một số lần” là phép chia.</li><li>Tìm số ban đầu hoặc số lần.</li><li>Giải bài toán thực tế về giảm đi nhiều lần.</li></ul></div>
+<button class="primary" onclick="startGame()">Bắt đầu</button>
+<button class="secondary" onclick="alert('Trò chơi gồm 3 vòng, 15 câu. Mỗi câu đúng được 10 điểm. Có 3 trái tim và 30 giây cho mỗi câu.')">Cách chơi</button>
+</section>
+
+<section id="game" class="hidden">
+<div class="top"><div><div class="title">THÀNH PHỐ TÍ HON</div><div>Bài 27 – Giảm một số đi một số lần</div></div>
+<div class="stats"><div class="pill">⭐ <span id="score">0</span></div><div class="pill">❤️ <span id="lives">3</span></div><div class="pill">⏱️ <span id="timer">30</span>s</div></div></div>
+<div class="mission">🔬 Khởi động máy co tí hon và thu nhỏ mọi vật đúng số lần!</div>
+<div class="progress"><div id="bar"></div></div>
+<div class="card"><div id="round" class="round"></div><div id="qno" class="qno"></div><div id="question" class="question"></div>
+<div id="interactive"></div><div id="feedback" class="feedback"></div>
+<div class="controls"><button class="secondary" onclick="showHint()">💡 Gợi ý</button><button id="nextBtn" class="primary hidden" onclick="nextQuestion()">Tiếp theo ➜</button></div></div>
+</section>
+
+<section id="end" class="card end hidden"><div class="medal">🏅</div><h2>Hoàn thành nhiệm vụ!</h2>
+<p style="font-size:22px">Em đạt <b><span id="finalScore">0</span>/<span id="maxScore">0</span></b> điểm.</p>
+<p style="font-size:24px;font-weight:800">KỸ SƯ THU NHỎ</p><button class="primary" onclick="location.reload()">Chơi lại</button></section>
+</div>
+
+<script>
+const questions=[{"round": "Vòng 1 – Thu nhỏ phép màu", "q": "Giảm 24 đi 3 lần được:", "type": "mcq", "options": ["A. 21", "B. 8", "C. 12", "D. 6"], "answer": 1, "explain": "24 : 3 = 8.", "hint": "Giảm đi mấy lần thì chia cho số lần."}, {"round": "Vòng 1 – Thu nhỏ phép màu", "q": "Giảm 36 đi 4 lần được:", "type": "mcq", "options": ["A. 9", "B. 32", "C. 12", "D. 8"], "answer": 0, "explain": "36 : 4 = 9.", "hint": "36 chia 4."}, {"round": "Vòng 1 – Thu nhỏ phép màu", "q": "Giảm 42 đi 6 lần được:", "type": "mcq", "options": ["A. 7", "B. 36", "C. 8", "D. 6"], "answer": 0, "explain": "42 : 6 = 7.", "hint": "42 chia 6."}, {"round": "Vòng 1 – Thu nhỏ phép màu", "q": "Giảm 56 đi 7 lần được:", "type": "mcq", "options": ["A. 49", "B. 7", "C. 8", "D. 9"], "answer": 2, "explain": "56 : 7 = 8.", "hint": "Bảng chia 7."}, {"round": "Vòng 1 – Thu nhỏ phép màu", "q": "Giảm 45 đi 5 lần được:", "type": "mcq", "options": ["A. 9", "B. 40", "C. 10", "D. 8"], "answer": 0, "explain": "45 : 5 = 9.", "hint": "45 chia 5."}, {"round": "Vòng 2 – Máy co tí hon", "q": "Muốn giảm một số đi 4 lần, ta:", "type": "mcq", "options": ["A. Nhân 4", "B. Chia 4", "C. Trừ 4", "D. Cộng 4"], "answer": 1, "explain": "Giảm đi 4 lần = chia cho 4.", "hint": "Từ khóa “giảm đi ... lần”."}, {"round": "Vòng 2 – Máy co tí hon", "q": "Một số giảm đi 3 lần được 8. Số ban đầu là:", "type": "input", "answer": "24", "explain": "8 × 3 = 24.", "hint": "Tìm số ban đầu bằng phép nhân."}, {"round": "Vòng 2 – Máy co tí hon", "q": "So sánh: giảm 48 đi 6 lần … giảm 32 đi 4 lần", "type": "select", "options": [">", "<", "="], "answer": "=", "explain": "48:6=8 và 32:4=8.", "hint": "Tính hai kết quả."}, {"round": "Vòng 2 – Máy co tí hon", "q": "Số nào là kết quả của việc giảm 63 đi 7 lần?", "type": "mcq", "options": ["A. 56", "B. 9", "C. 8", "D. 7"], "answer": 1, "explain": "63 : 7 = 9.", "hint": "63 chia 7."}, {"round": "Vòng 2 – Máy co tí hon", "q": "Điền số: 54 giảm đi ? lần được 9", "type": "input", "answer": "6", "explain": "54 : 6 = 9.", "hint": "54 : 9 = 6."}, {"round": "Vòng 3 – Thành phố tí hon", "q": "Một sợi dây dài 36 cm, cắt ngắn còn bằng 1/4 độ dài ban đầu. Dây còn dài bao nhiêu cm?", "type": "input", "answer": "9", "explain": "36 : 4 = 9 cm.", "hint": "Giảm đi 4 lần."}, {"round": "Vòng 3 – Thành phố tí hon", "q": "Một can có 42 lít nước. Sau khi dùng, lượng nước còn lại giảm đi 6 lần. Còn bao nhiêu lít?", "type": "input", "answer": "7", "explain": "42 : 6 = 7 lít.", "hint": "42 chia 6."}, {"round": "Vòng 3 – Thành phố tí hon", "q": "Một hộp có 48 viên bi. Số bi còn lại giảm đi 8 lần. Còn bao nhiêu viên?", "type": "input", "answer": "6", "explain": "48 : 8 = 6.", "hint": "48 chia 8."}, {"round": "Vòng 3 – Thành phố tí hon", "q": "Một đoạn đường dài 54 m. Đoạn đường nhỏ dài bằng 1/6 đoạn đó. Dài bao nhiêu mét?", "type": "input", "answer": "9", "explain": "54 : 6 = 9 m.", "hint": "Giảm đi 6 lần."}, {"round": "Vòng 3 – Thành phố tí hon", "q": "Có 63 quả bóng. Sau khi giảm số bóng đi 7 lần, còn bao nhiêu quả?", "type": "input", "answer": "9", "explain": "63 : 7 = 9.", "hint": "63 chia 7."}]; let idx=0,score=0,lives=3,timeLeft=30,timerId=null,locked=false; const maxScore=questions.length*10;
+function startGame(){document.getElementById('start').classList.add('hidden');document.getElementById('game').classList.remove('hidden');render();}
+function startTimer(){clearInterval(timerId);timeLeft=30;document.getElementById('timer').textContent=timeLeft;timerId=setInterval(()=>{timeLeft--;document.getElementById('timer').textContent=timeLeft;if(timeLeft<=0){clearInterval(timerId);wrong(true);}},1000);}
+function norm(v){return String(v).trim().toLowerCase().replace(/\s+/g,'');}
+function render(){locked=false;const q=questions[idx];
+document.getElementById('round').textContent=q.round;document.getElementById('qno').textContent=`Câu ${idx+1}/${questions.length}`;document.getElementById('question').innerHTML=q.q;
+document.getElementById('feedback').innerHTML='';document.getElementById('nextBtn').classList.add('hidden');document.getElementById('bar').style.width=(idx/questions.length*100)+'%';
+const box=document.getElementById('interactive');box.innerHTML='';
+if(q.type==='mcq'){const wrap=document.createElement('div');wrap.className='options';q.options.forEach((op,i)=>{const b=document.createElement('button');b.className='option';b.innerHTML=op;b.onclick=()=>checkMCQ(i,b);wrap.appendChild(b);});box.appendChild(wrap);}
+else if(q.type==='input'){const inp=document.createElement('input');inp.id='ans';inp.placeholder='Nhập đáp án...';box.appendChild(inp);const b=document.createElement('button');b.className='primary';b.style.marginTop='12px';b.textContent='Kiểm tra';b.onclick=checkInput;box.appendChild(b);}
+else if(q.type==='select'){const s=document.createElement('select');s.id='sel';q.options.forEach(op=>{const o=document.createElement('option');o.value=op;o.textContent=op;s.appendChild(o);});box.appendChild(s);const b=document.createElement('button');b.className='primary';b.style.marginTop='12px';b.textContent='Kiểm tra';b.onclick=checkSelect;box.appendChild(b);}
+startTimer();}
+function checkMCQ(i,b){if(locked)return;const q=questions[idx];if(i===q.answer){b.classList.add('correct');correct();}else{b.classList.add('wrong');wrong(false);}}
+function checkInput(){if(locked)return;const q=questions[idx],v=document.getElementById('ans').value;if(norm(v)===norm(q.answer))correct();else wrong(false);}
+function checkSelect(){if(locked)return;const q=questions[idx],v=document.getElementById('sel').value;if(norm(v)===norm(q.answer))correct();else wrong(false);}
+function correct(){locked=true;clearInterval(timerId);score+=10;document.getElementById('score').textContent=score;const q=questions[idx];
+document.getElementById('feedback').innerHTML='✅ Chính xác! '+q.explain;document.getElementById('nextBtn').classList.remove('hidden');document.getElementById('bar').style.width=((idx+1)/questions.length*100)+'%';}
+function wrong(timeout){if(locked)return;lives=Math.max(0,lives-1);document.getElementById('lives').textContent=lives;const q=questions[idx];
+document.getElementById('feedback').innerHTML=(timeout?'⏰ Hết giờ! ':'❌ Chưa đúng. ')+(q.hint||'Thử lại nhé!');
+if(lives<=0){locked=true;clearInterval(timerId);document.getElementById('feedback').innerHTML+=' <b>Hết trái tim, chuyển câu tiếp theo.</b>';document.getElementById('nextBtn').classList.remove('hidden');} else if(timeout) startTimer();}
+function showHint(){document.getElementById('feedback').innerHTML='💡 '+questions[idx].hint;}
+function nextQuestion(){idx++;if(idx>=questions.length)finish();else render();}
+function finish(){clearInterval(timerId);document.getElementById('game').classList.add('hidden');document.getElementById('end').classList.remove('hidden');document.getElementById('finalScore').textContent=score;document.getElementById('maxScore').textContent=maxScore;}
+</script></body></html>
